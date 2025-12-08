@@ -19,26 +19,26 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 24px;
     }
 
     /* Wheel container */
     .wheel-wrapper {
       position: relative;
-      width: 520px;
-      height: 520px;
+      width: 640px;
+      height: 640px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* Wheel graphics (bigger) */
+    /* Wheel graphics (600px) */
     .wheel {
-      width: 480px;
-      height: 480px;
+      width: 600px;
+      height: 600px;
       border-radius: 50%;
-      border: 8px solid #ff66aa;
-      box-shadow: 0 0 22px rgba(0,0,0,0.9);
+      border: 10px solid #ff66aa;
+      box-shadow: 0 0 24px rgba(0,0,0,0.9);
       position: relative;
       transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1);
       transform: rotate(0deg);
@@ -66,10 +66,10 @@
       top: 50%;
       transform-origin: center center;
       color: #fff;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
       text-shadow: 0 0 3px #000;
-      width: 70px;
+      width: 80px;
       text-align: center;
       line-height: 1.1;
     }
@@ -77,14 +77,14 @@
     /* Pointer */
     .pointer {
       position: absolute;
-      top: -18px;
+      top: -22px;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
-      border-left: 18px solid transparent;
-      border-right: 18px solid transparent;
-      border-bottom: 30px solid #ffffff;
+      border-left: 22px solid transparent;
+      border-right: 22px solid transparent;
+      border-bottom: 34px solid #ffffff;
       filter: drop-shadow(0 0 4px #000);
       z-index: 20;
     }
@@ -92,15 +92,15 @@
     /* Big win overlay */
     .big-win-overlay {
       position: absolute;
-      top: 42%;
+      top: 40%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0.5);
-      padding: 10px 18px;
+      padding: 12px 22px;
       border-radius: 999px;
       background: rgba(0, 0, 0, 0.8);
       border: 2px solid #00ff66;
       color: #00ff66;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
       text-shadow: 0 0 6px #000;
       display: none;
@@ -112,15 +112,15 @@
     /* "Send Now Piggy" overlay */
     .send-now-overlay {
       position: absolute;
-      top: 78%;
+      top: 80%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 8px 16px;
+      padding: 8px 18px;
       border-radius: 999px;
       background: rgba(0, 0, 0, 0.85);
       border: 2px solid #ffcc00;
       color: #ffcc00;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 900;
       text-shadow: 0 0 6px #000;
       display: none;
@@ -147,12 +147,12 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 12px 26px;
+      padding: 14px 32px;
       border: none;
       border-radius: 999px;
       background: linear-gradient(135deg, #ff66aa, #ff3366);
       color: #fff;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
       cursor: pointer;
       text-transform: uppercase;
@@ -164,35 +164,35 @@
       cursor: not-allowed;
     }
 
-    /* Stats below wheel */
+    /* Stats below wheel – a bit bigger & wider */
     .sidebar {
       width: 100%;
-      max-width: 420px;
+      max-width: 520px;
       background: #181818;
-      border-radius: 10px;
-      padding: 16px 18px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      border-radius: 12px;
+      padding: 20px 22px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.7);
       text-align: center;
     }
 
     .sidebar h2 {
       margin-top: 0;
-      margin-bottom: 8px;
-      font-size: 22px;
+      margin-bottom: 10px;
+      font-size: 24px;
       border-bottom: 1px solid #333;
-      padding-bottom: 6px;
+      padding-bottom: 8px;
     }
 
     .stats-row {
       display: flex;
       justify-content: space-around;
-      margin-bottom: 8px;
-      font-size: 16px;
+      margin-bottom: 10px;
+      font-size: 18px;
     }
 
     .history-title {
-      margin-top: 10px;
-      font-size: 16px;
+      margin-top: 12px;
+      font-size: 18px;
       border-bottom: 1px solid #333;
       padding-bottom: 5px;
     }
@@ -200,21 +200,21 @@
     .history {
       list-style: none;
       padding-left: 0;
-      max-height: 120px;
+      max-height: 140px;
       overflow-y: auto;
-      font-size: 14px;
+      font-size: 15px;
       text-align: left;
       margin: 0;
     }
 
     .history li {
-      padding: 2px 0;
+      padding: 3px 0;
     }
 
     .reset-btn {
-      margin-top: 10px;
-      padding: 6px 12px;
-      font-size: 14px;
+      margin-top: 12px;
+      padding: 8px 14px;
+      font-size: 15px;
       border-radius: 4px;
       border: 1px solid #444;
       background: #222;
@@ -315,7 +315,7 @@
 
     /* 4. LABELS ON BIGGER WHEEL */
     function createLabels() {
-      const radius = 210;
+      const radius = 260; // tuned for 600px wheel
       prizes.forEach((value, index) => {
         const label = document.createElement("div");
         label.className = "wheel-label";
@@ -456,8 +456,17 @@
       wheel.addEventListener("transitionend", onTransitionEnd);
     }
 
-    /* 9. RESET SESSION */
+    /* 9. SHOW SESSION SUMMARY + RESET */
     function resetSession() {
+      if (spinCount > 0) {
+        const summary =
+          `Cash Piggy Session Summary\n\n` +
+          `Spins: ${spinCount}\n` +
+          `Total: $${total}\n\n` +
+          `Last spin: ${lastResultEl.textContent === "–" ? "N/A" : "$" + lastResultEl.textContent}`;
+        alert(summary);
+      }
+
       total = 0;
       spinCount = 0;
       totalEl.textContent = "0";
