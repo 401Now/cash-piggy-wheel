@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cash Piggy Wheel 🐷💰</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #ff99cc 0, #111 55%);
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Wheel container */
+    .wheel-wrapper {
+      position: relative;
+      width: 520px;
+      height: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Wheel graphics (bigger) */
+    .wheel {
+      width: 480px;
+      height: 480px;
+      border-radius: 50%;
+      border: 8px solid #ff66aa;
+      box-shadow: 0 0 22px rgba(0,0,0,0.9);
+      position: relative;
+      transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1);
+      transform: rotate(0deg);
+      background: conic-gradient(
+        #c40000 0deg 27.7deg,
+        #000000 27.7deg 55.4deg,
+        #c40000 55.4deg 83.1deg,
+        #000000 83.1deg 110.8deg,
+        #c40000 110.8deg 138.5deg,
+        #000000 138.5deg 166.2deg,
+        #c40000 166.2deg 193.8deg,
+        #000000 193.8deg 221.5deg,
+        #c40000 221.5deg 249.2deg,
+        #000000 249.2deg 276.9deg,
+        #c40000 276.9deg 304.6deg,
+        #000000 304.6deg 332.3deg,
+        #c40000 332.3deg 360deg
+      );
+    }
+
+    /* Labels pinned to slices */
+    .wheel-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: center center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 0 0 3px #000;
+      width: 70px;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    /* Pointer */
+    .pointer {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-bottom: 30px solid #ffffff;
+      filter: drop-shadow(0 0 4px #000);
+      z-index: 20;
+    }
+
+    /* Big win overlay */
+    .big-win-overlay {
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #00ff66;
+      color: #00ff66;
+      font-size: 20px;
+      font-weight: bold;
+      text-shadow: 0 0 6px #000;
+      display: none;
+      white-space: nowrap;
+      z-index: 30;
+      animation: piggy-pop 0.6s ease-out forwards;
+    }
+
+    /* "Send Now Piggy" overlay */
+    .send-now-overlay {
+      position: absolute;
+      top: 78%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid #ffcc00;
+      color: #ffcc00;
+      font-size: 22px;
+      font-weight: 900;
+      text-shadow: 0 0 6px #000;
+      display: none;
+      white-space: nowrap;
+      z-index: 30;
+      animation: send-flash 1s linear infinite;
+    }
+
+    @keyframes piggy-pop {
+      0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+      50%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    @keyframes send-flash {
+      0%   { opacity: 0.1; transform: translate(-50%, -50%) scale(0.95); }
+      50%  { opacity: 1;   transform: translate(-50%, -50%) scale(1.05); }
+      100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.98); }
+    }
+
+    /* Spin button - centered on wheel */
+    .spin-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 12px 26px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ff66aa, #ff3366);
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 0 12px rgba(0,0,0,0.8);
+      z-index: 25;
+    }
+    .spin-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Stats below wheel */
+    .sidebar {
+      width: 100%;
+      max-width: 420px;
+      background: #181818;
+      border-radius: 10px;
+      padding: 16px 18px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      text-align: center;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 22px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 6px;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .history-title {
+      margin-top: 10px;
+      font-size: 16px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 5px;
+    }
+
+    .history {
+      list-style: none;
+      padding-left: 0;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 14px;
+      text-align: left;
+      margin: 0;
+    }
+
+    .history li {
+      padding: 2px 0;
+    }
+
+    .reset-btn {
+      margin-top: 10px;
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #222;
+      color: #eee;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Wheel area -->
+    <div class="wheel-wrapper">
+      <div class="pointer"></div>
+      <div id="wheel" class="wheel"></div>
+
+      <div id="bigWinOverlay" class="big-win-overlay">
+        🐷💰 CASH PIGGY BIG WIN! 💰🐷
+      </div>
+
+      <div id="sendNowOverlay" class="send-now-overlay">
+        SEND NOW PIGGY
+      </div>
+
+      <!-- Spin button in center -->
+      <button id="spinBtn" class="spin-btn">Spin</button>
+
+      <!-- Audio files (must be in same folder) -->
+      <audio id="spinOink" src="pig-spin.mp3" preload="auto"></audio>
+      <audio id="winOinks" src="pig-win.mp3" preload="auto"></audio>
+      <audio id="bigWinSound" src="cash-win.mp3" preload="auto"></audio>
+    </div>
+
+    <!-- Stats / counter BELOW wheel -->
+    <div class="sidebar">
+      <h2>Cash Piggy 🐷</h2>
+
+      <div class="stats-row">
+        <div>Total: <strong>$<span id="total">0</span></strong></div>
+        <div>Spins: <strong><span id="spinCount">0</span></strong></div>
+        <div>Last: <strong>$<span id="lastResult">–</span></strong></div>
+      </div>
+
+      <div class="history-title">Spin history</div>
+      <ul id="history" class="history"></ul>
+
+      <button id="resetBtn" class="reset-btn">Reset session</button>
+    </div>
+  </div>
+
+  <script>
+    /* 1. BASE VALUES (SHUFFLED EACH LOAD) */
+    const basePrizes = [5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150];
+    const sliceCount = basePrizes.length;
+    const sliceAngle = 360 / sliceCount;
+
+    function shuffleArray(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const prizes = shuffleArray(basePrizes);
+
+    /* 2. WEIGHTED ODDS (10% BOOST FOR 50, 100, 150) */
+    const baseWeight = 1;
+    const bonusWeight = 1.1;
+    const prizeWeights = prizes.map(v => {
+      if (v === 50 || v === 100 || v === 150) return bonusWeight;
+      return baseWeight;
+    });
+
+    /* 3. DOM ELEMENTS */
+    const wheel = document.getElementById("wheel");
+    const spinBtn = document.getElementById("spinBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const bigWinOverlay = document.getElementById("bigWinOverlay");
+    const sendNowOverlay = document.getElementById("sendNowOverlay");
+
+    const totalEl = document.getElementById("total");
+    const lastResultEl = document.getElementById("lastResult");
+    const spinCountEl = document.getElementById("spinCount");
+    const historyEl = document.getElementById("history");
+
+    const spinOink = document.getElementById("spinOink");
+    const winOinks = document.getElementById("winOinks");
+    const bigWinSound = document.getElementById("bigWinSound");
+
+    let currentRotation = 0;
+    let isSpinning = false;
+    let total = 0;
+    let spinCount = 0;
+    let audioPrimed = false;
+    let sendNowTimeoutId = null;
+
+    /* 4. LABELS ON BIGGER WHEEL */
+    function createLabels() {
+      const radius = 210;
+      prizes.forEach((value, index) => {
+        const label = document.createElement("div");
+        label.className = "wheel-label";
+        label.textContent = "$" + value;
+
+        const angleDeg = index * sliceAngle;
+        const angleRad = (angleDeg - 90) * Math.PI / 180;
+
+        const x = radius * Math.cos(angleRad);
+        const y = radius * Math.sin(angleRad);
+
+        label.style.transform =
+          `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+        wheel.appendChild(label);
+      });
+    }
+
+    createLabels();
+
+    /* 5. WEIGHTED RANDOM PICK */
+    function pickWeightedIndex(weights) {
+      const sum = weights.reduce((a, b) => a + b, 0);
+      let r = Math.random() * sum;
+      for (let i = 0; i < weights.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return i;
+      }
+      return weights.length - 1;
+    }
+
+    /* 6. AUDIO HELPERS & PRIMING */
+    function playSoundSafe(audioEl) {
+      if (!audioEl) return;
+      try {
+        audioEl.currentTime = 0;
+        audioEl.play().catch(() => {});
+      } catch (e) {}
+    }
+
+    function primeAudioIfNeeded() {
+      if (audioPrimed) return;
+      audioPrimed = true;
+
+      const audios = [spinOink, winOinks, bigWinSound];
+      audios.forEach(a => {
+        if (!a) return;
+        const originalVolume = a.volume;
+        a.volume = 0;
+        a.play().catch(() => {});
+        setTimeout(() => {
+          try {
+            a.pause();
+            a.currentTime = 0;
+          } catch (e) {}
+          a.volume = originalVolume;
+        }, 200);
+      });
+    }
+
+    /* 7. SHOW "SEND NOW PIGGY" FOR 4 SECONDS */
+    function showSendNowPrompt() {
+      if (sendNowTimeoutId !== null) {
+        clearTimeout(sendNowTimeoutId);
+      }
+      sendNowOverlay.style.display = "block";
+      sendNowTimeoutId = setTimeout(() => {
+        sendNowOverlay.style.display = "none";
+      }, 4000);
+    }
+
+    /* 8. SPIN LOGIC (HIDE BUTTON WHILE SPINNING) */
+    function spinWheel() {
+      if (isSpinning) return;
+
+      primeAudioIfNeeded();
+
+      isSpinning = true;
+      spinBtn.disabled = true;
+      spinBtn.style.display = "none";
+      bigWinOverlay.style.display = "none";
+      sendNowOverlay.style.display = "none";
+
+      playSoundSafe(spinOink);
+
+      const targetIndex = pickWeightedIndex(prizeWeights);
+      const targetPrize = prizes[targetIndex];
+
+      const targetSliceAngle = targetIndex * sliceAngle;
+      const desiredFinal = (360 - targetSliceAngle) % 360;
+
+      const extraTurns = 2 + Math.floor(Math.random() * 4);
+      const fullRotationDegrees = extraTurns * 360;
+
+      let delta = (desiredFinal - (currentRotation % 360) + 360) % 360;
+      const newRotation = currentRotation + fullRotationDegrees + delta;
+
+      wheel.style.transition =
+        "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
+      wheel.style.transform = `rotate(${newRotation}deg)`;
+
+      const onTransitionEnd = () => {
+        wheel.removeEventListener("transitionend", onTransitionEnd);
+        currentRotation = newRotation;
+
+        playSoundSafe(winOinks);
+
+        if (targetPrize === 50 || targetPrize === 100 || targetPrize === 150) {
+          bigWinOverlay.style.display = "block";
+          bigWinOverlay.style.animation = "none";
+          void bigWinOverlay.offsetWidth;
+          bigWinOverlay.style.animation = "piggy-pop 0.6s ease-out forwards";
+          playSoundSafe(bigWinSound);
+
+          setTimeout(() => {
+            bigWinOverlay.style.display = "none";
+          }, 3500);
+        }
+
+        total += targetPrize;
+        spinCount++;
+
+        totalEl.textContent = total;
+        lastResultEl.textContent = targetPrize;
+        spinCountEl.textContent = spinCount;
+
+        const li = document.createElement("li");
+        li.textContent = `Spin ${spinCount}: $${targetPrize}`;
+        historyEl.prepend(li);
+
+        // Show "Send Now Piggy" prompt
+        showSendNowPrompt();
+
+        isSpinning = false;
+        spinBtn.disabled = false;
+        spinBtn.style.display = "block";
+      };
+
+      wheel.addEventListener("transitionend", onTransitionEnd);
+    }
+
+    /* 9. RESET SESSION */
+    function resetSession() {
+      total = 0;
+      spinCount = 0;
+      totalEl.textContent = "0";
+      spinCountEl.textContent = "0";
+      lastResultEl.textContent = "–";
+      historyEl.innerHTML = "";
+      bigWinOverlay.style.display = "none";
+      sendNowOverlay.style.display = "none";
+    }
+
+    spinBtn.addEventListener("click", spinWheel);
+    resetBtn.addEventListener("click", resetSession);
+  </script>
+</body>
+</html>
