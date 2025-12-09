@@ -264,6 +264,7 @@
       font-size: 18px;
       z-index: 25;
       background: linear-gradient(135deg, #44ddaa, #11aa88);
+      display: none; /* hide manual button – multiplier is auto now */
     }
 
     /* ---------- STATS / COUNTER ---------- */
@@ -598,18 +599,26 @@
         checkUnlockMultiplier();
 
         isBaseSpinning = false;
-        spinBtn.disabled = false;
-        spinBtn.style.display = "block";
+
+        // If unlocked, automatically spin multiplier wheel
+        if (total >= 150) {
+          spinMultiplierWheel();  // auto-chained spin
+        } else {
+          // No multiplier yet, re-enable main spin
+          spinBtn.disabled = false;
+          spinBtn.style.display = "block";
+        }
       };
 
       wheel.addEventListener("transitionend", onEnd);
     }
 
-    /* ---------- MULTIPLIER WHEEL SPIN ---------- */
+    /* ---------- MULTIPLIER WHEEL SPIN (AUTO AFTER UNLOCK) ---------- */
 
     function spinMultiplierWheel() {
       if (isBaseSpinning || isMultSpinning) return;
       if (total < 150) {
+        // Shouldn't happen when called automatically, but keep safety
         alert("Multiplier wheel unlocks after total reaches $150.");
         return;
       }
@@ -626,6 +635,10 @@
       multSpinBtn.disabled = true;
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
+
+      // Hide main spin button while multiplier runs
+      spinBtn.disabled = true;
+      spinBtn.style.display = "none";
 
       playSoundSafe(spinOink);
 
@@ -677,6 +690,10 @@
 
         isMultSpinning = false;
         multSpinBtn.disabled = false;
+
+        // Re-enable main spin after multiplier auto-spin
+        spinBtn.disabled = false;
+        spinBtn.style.display = "block";
       };
 
       multWheel.addEventListener("transitionend", onEnd);
@@ -703,10 +720,15 @@
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
       multWrapper.classList.remove("unlocked");
+      isBaseSpinning = false;
+      isMultSpinning = false;
+      spinBtn.disabled = false;
+      spinBtn.style.display = "block";
     }
 
     /* ---------- EVENTS ---------- */
     spinBtn.addEventListener("click", spinBaseWheel);
+    // Manual multiplier spin is hidden now, but keep listener for safety
     multSpinBtn.addEventListener("click", spinMultiplierWheel);
     resetBtn.addEventListener("click", resetSession);
   </script>
