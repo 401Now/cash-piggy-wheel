@@ -264,7 +264,7 @@
       font-size: 18px;
       z-index: 25;
       background: linear-gradient(135deg, #44ddaa, #11aa88);
-      display: none; /* hidden; multiplier is auto now */
+      display: none; /* hidden; multiplier is auto */
     }
 
     /* ---------- STATS / COUNTER ---------- */
@@ -434,8 +434,7 @@
     /* ---------- STATE ---------- */
     let baseRotation = 0;
     let multRotation = 0;
-    let isBaseSpinning = false;
-    let isMultSpinning = false;
+    let isSpinning = false;      // single flag for both wheels
     let total = 0;
     let spinCount = 0;
     let audioPrimed = false;
@@ -545,11 +544,11 @@
     /* ---------- MAIN CASH WHEEL SPIN ---------- */
 
     function spinBaseWheel() {
-      if (isBaseSpinning || isMultSpinning) return;
+      if (isSpinning) return;   // block if anything is spinning
 
       primeAudioIfNeeded();
 
-      isBaseSpinning = true;
+      isSpinning = true;
       spinBtn.disabled = true;
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
@@ -578,7 +577,6 @@
 
         playSoundSafe(winOinks);
 
-        // Big win if we hit the top value (50)
         if (targetPrize === 50) {
           showBigWin();
         }
@@ -597,13 +595,12 @@
         showSendNowPrompt();
         checkUnlockMultiplier();
 
-        isBaseSpinning = false;
-
-        // If unlocked, automatically spin multiplier wheel
+        // If unlocked, automatically spin multiplier wheel using this base prize
         if (total >= 150) {
-          spinMultiplierWheel();  // auto-chained spin
+          spinMultiplierAuto(targetPrize);
         } else {
-          // No multiplier yet, re-enable main spin
+          // No multiplier yet, fully done
+          isSpinning = false;
           spinBtn.disabled = false;
         }
       };
@@ -613,29 +610,9 @@
 
     /* ---------- MULTIPLIER WHEEL SPIN (AUTO AFTER UNLOCK) ---------- */
 
-    function spinMultiplierWheel() {
-      if (isBaseSpinning || isMultSpinning) return;
-      if (total < 150) {
-        // Shouldn't happen when called automatically, but keep safety
-        alert("Multiplier wheel unlocks after total reaches $150.");
-        return;
-      }
-
-      const lastText = lastResultEl.textContent;
-      if (lastText === "–") {
-        alert("Spin the main wheel at least once first.");
-        return;
-      }
-
-      primeAudioIfNeeded();
-
-      isMultSpinning = true;
-      multSpinBtn.disabled = true;
-      bigWinOverlay.style.display = "none";
-      sendNowOverlay.style.display = "none";
-
-      // Keep main spin visible but disabled while multiplier runs
-      spinBtn.disabled = true;
+    function spinMultiplierAuto(baseAmount) {
+      // baseAmount = the prize from the just-finished base spin
+      // assumes total >= 150 and isSpinning is already true
 
       playSoundSafe(spinOink);
 
@@ -661,10 +638,8 @@
 
         playSoundSafe(winOinks);
 
-        // Multiplier applies to LAST win, and that payout is added to total
-        const baseAmount = parseInt(lastText, 10) || 0;
         const raw = baseAmount * multiplier;
-        const payout = Math.round(raw / 5) * 5; // round to nearest $5
+        const payout = Math.round(raw / 5) * 5; // round to nearest 5
 
         total += payout;
         spinCount++;
@@ -685,10 +660,8 @@
         showSendNowPrompt();
         checkUnlockMultiplier();
 
-        isMultSpinning = false;
-        multSpinBtn.disabled = false;
-
-        // Re-enable main spin after multiplier auto-spin
+        // sequence finished: allow new spin
+        isSpinning = false;
         spinBtn.disabled = false;
       };
 
@@ -716,15 +689,16 @@
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
       multWrapper.classList.remove("unlocked");
-      isBaseSpinning = false;
-      isMultSpinning = false;
+      isSpinning = false;
       spinBtn.disabled = false;
     }
 
     /* ---------- EVENTS ---------- */
     spinBtn.addEventListener("click", spinBaseWheel);
-    // Manual multiplier spin is hidden now, but keep listener for safety
-    multSpinBtn.addEventListener("click", spinMultiplierWheel);
+    // Manual multiplier button still wired but hidden
+    multSpinBtn.addEventListener("click", () => {
+      alert("Multiplier spins automatically after unlock.");
+    });
     resetBtn.addEventListener("click", resetSession);
   </script>
 </body>
