@@ -19,10 +19,18 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 24px;
+      gap: 20px;
     }
 
-    /* Wheel container */
+    /* Row that holds main + multiplier wheels */
+    .wheels-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    /* ---------- MAIN WHEEL (600px) ---------- */
     .wheel-wrapper {
       position: relative;
       width: 640px;
@@ -32,7 +40,6 @@
       justify-content: center;
     }
 
-    /* Wheel graphics (600px) */
     .wheel {
       width: 600px;
       height: 600px;
@@ -42,24 +49,21 @@
       position: relative;
       transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1);
       transform: rotate(0deg);
+      /* 10 equal slices = 36deg each */
       background: conic-gradient(
-        #c40000 0deg 27.7deg,
-        #000000 27.7deg 55.4deg,
-        #c40000 55.4deg 83.1deg,
-        #000000 83.1deg 110.8deg,
-        #c40000 110.8deg 138.5deg,
-        #000000 138.5deg 166.2deg,
-        #c40000 166.2deg 193.8deg,
-        #000000 193.8deg 221.5deg,
-        #c40000 221.5deg 249.2deg,
-        #000000 249.2deg 276.9deg,
-        #c40000 276.9deg 304.6deg,
-        #000000 304.6deg 332.3deg,
-        #c40000 332.3deg 360deg
+        #c40000 0deg 36deg,
+        #000000 36deg 72deg,
+        #c40000 72deg 108deg,
+        #000000 108deg 144deg,
+        #c40000 144deg 180deg,
+        #000000 180deg 216deg,
+        #c40000 216deg 252deg,
+        #000000 252deg 288deg,
+        #c40000 288deg 324deg,
+        #000000 324deg 360deg
       );
     }
 
-    /* Labels pinned to slices */
     .wheel-label {
       position: absolute;
       left: 50%;
@@ -74,7 +78,6 @@
       line-height: 1.1;
     }
 
-    /* Pointer */
     .pointer {
       position: absolute;
       top: -22px;
@@ -105,7 +108,7 @@
       text-shadow: 0 0 6px #000;
       display: none;
       white-space: nowrap;
-      z-index: 30;
+      z-index: 40;
       animation: piggy-pop 0.6s ease-out forwards;
     }
 
@@ -125,7 +128,7 @@
       text-shadow: 0 0 6px #000;
       display: none;
       white-space: nowrap;
-      z-index: 30;
+      z-index: 40;
       animation: send-flash 1s linear infinite;
     }
 
@@ -141,7 +144,6 @@
       100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.98); }
     }
 
-    /* Spin button - centered on wheel */
     .spin-btn {
       position: absolute;
       top: 50%;
@@ -157,14 +159,114 @@
       cursor: pointer;
       text-transform: uppercase;
       box-shadow: 0 0 12px rgba(0,0,0,0.8);
-      z-index: 25;
+      z-index: 35;
     }
     .spin-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
 
-    /* Stats below wheel – a bit bigger & wider */
+    /* ---------- MULTIPLIER WHEEL (350px) ---------- */
+    .mult-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .mult-title {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
+    .mult-locked {
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid #888;
+      color: #ddd;
+      white-space: nowrap;
+    }
+
+    .mult-inner {
+      position: relative;
+      width: 380px;
+      height: 380px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mult-wrapper.unlocked .mult-inner {
+      display: flex;
+    }
+    .mult-wrapper.unlocked .mult-locked {
+      display: none;
+    }
+
+    .mult-wheel {
+      width: 350px;
+      height: 350px;
+      border-radius: 50%;
+      border: 8px solid #44ddaa;
+      box-shadow: 0 0 18px rgba(0,0,0,0.9);
+      position: relative;
+      transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1);
+      transform: rotate(0deg);
+      background: conic-gradient(
+        #146b3a 0deg 45deg,
+        #f8b229 45deg 90deg,
+        #146b3a 90deg 135deg,
+        #f8b229 135deg 180deg,
+        #146b3a 180deg 225deg,
+        #f8b229 225deg 270deg,
+        #146b3a 270deg 315deg,
+        #f8b229 315deg 360deg
+      );
+    }
+
+    .mult-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: center center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 0 0 3px #000;
+      width: 80px;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .mult-pointer {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-bottom: 30px solid #ffffff;
+      filter: drop-shadow(0 0 4px #000);
+      z-index: 20;
+    }
+
+    .mult-spin-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 10px 24px;
+      font-size: 18px;
+      z-index: 25;
+      background: linear-gradient(135deg, #44ddaa, #11aa88);
+    }
+
+    /* ---------- STATS / COUNTER ---------- */
     .sidebar {
       width: 100%;
       max-width: 520px;
@@ -226,29 +328,47 @@
 </head>
 <body>
   <div class="app">
-    <!-- Wheel area -->
-    <div class="wheel-wrapper">
-      <div class="pointer"></div>
-      <div id="wheel" class="wheel"></div>
+    <!-- MAIN + MULTIPLIER WHEELS IN A ROW -->
+    <div class="wheels-row">
+      <!-- MAIN CASH WHEEL -->
+      <div class="wheel-wrapper">
+        <div class="pointer"></div>
+        <div id="wheel" class="wheel"></div>
 
-      <div id="bigWinOverlay" class="big-win-overlay">
-        🐷💰 CASH PIGGY BIG WIN! 💰🐷
+        <div id="bigWinOverlay" class="big-win-overlay">
+          🐷💰 CASH PIGGY BIG WIN! 💰🐷
+        </div>
+
+        <div id="sendNowOverlay" class="send-now-overlay">
+          SEND NOW PIGGY
+        </div>
+
+        <button id="spinBtn" class="spin-btn">Spin</button>
+
+        <!-- Audio -->
+        <audio id="spinOink" src="pig-spin.mp3" preload="auto"></audio>
+        <audio id="winOinks" src="pig-win.mp3" preload="auto"></audio>
+        <audio id="bigWinSound" src="cash-win.mp3" preload="auto"></audio>
       </div>
 
-      <div id="sendNowOverlay" class="send-now-overlay">
-        SEND NOW PIGGY
+      <!-- MULTIPLIER WHEEL (LOCKED UNTIL TOTAL >= 150) -->
+      <div id="multWrapper" class="mult-wrapper">
+        <div class="mult-title">Multiplier Wheel</div>
+        <div id="multLocked" class="mult-locked">
+          🔒 Locked – reach $150 total to unlock
+        </div>
+
+        <div class="mult-inner">
+          <div class="mult-pointer"></div>
+          <div id="multWheel" class="mult-wheel"></div>
+          <button id="multSpinBtn" class="spin-btn mult-spin-btn">
+            Spin Multiplier
+          </button>
+        </div>
       </div>
-
-      <!-- Spin button in center -->
-      <button id="spinBtn" class="spin-btn">Spin</button>
-
-      <!-- Audio files (must be in same folder) -->
-      <audio id="spinOink" src="pig-spin.mp3" preload="auto"></audio>
-      <audio id="winOinks" src="pig-win.mp3" preload="auto"></audio>
-      <audio id="bigWinSound" src="cash-win.mp3" preload="auto"></audio>
     </div>
 
-    <!-- Stats / counter BELOW wheel -->
+    <!-- STATS / COUNTER -->
     <div class="sidebar">
       <h2>Cash Piggy 🐷</h2>
 
@@ -266,10 +386,17 @@
   </div>
 
   <script>
-    /* 1. BASE VALUES (SHUFFLED EACH LOAD) */
-    const basePrizes = [5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150];
-    const sliceCount = basePrizes.length;
-    const sliceAngle = 360 / sliceCount;
+    /* ---------- DATA ---------- */
+
+    // Wheel 1: 5–50 in increments of 5 (randomized order)
+    const basePrizes = [5,10,15,20,25,30,35,40,45,50];
+    const baseSliceCount = basePrizes.length;
+    const baseSliceAngle = 360 / baseSliceCount;
+
+    // Multiplier wheel: unlocks at total >= 150
+    const baseMultipliers = [1.25,1.5,1.75,2,2.25,2.5,2.75,3];
+    const multSliceCount = baseMultipliers.length;
+    const multSliceAngle = 360 / multSliceCount;
 
     function shuffleArray(arr) {
       const a = arr.slice();
@@ -281,21 +408,18 @@
     }
 
     const prizes = shuffleArray(basePrizes);
+    const multipliers = shuffleArray(baseMultipliers);
 
-    /* 2. WEIGHTED ODDS (10% BOOST FOR 50, 100, 150) */
-    const baseWeight = 1;
-    const bonusWeight = 1.1;
-    const prizeWeights = prizes.map(v => {
-      if (v === 50 || v === 100 || v === 150) return bonusWeight;
-      return baseWeight;
-    });
-
-    /* 3. DOM ELEMENTS */
+    /* ---------- DOM ---------- */
     const wheel = document.getElementById("wheel");
     const spinBtn = document.getElementById("spinBtn");
     const resetBtn = document.getElementById("resetBtn");
     const bigWinOverlay = document.getElementById("bigWinOverlay");
     const sendNowOverlay = document.getElementById("sendNowOverlay");
+
+    const multWrapper = document.getElementById("multWrapper");
+    const multWheel = document.getElementById("multWheel");
+    const multSpinBtn = document.getElementById("multSpinBtn");
 
     const totalEl = document.getElementById("total");
     const lastResultEl = document.getElementById("lastResult");
@@ -306,24 +430,27 @@
     const winOinks = document.getElementById("winOinks");
     const bigWinSound = document.getElementById("bigWinSound");
 
-    let currentRotation = 0;
-    let isSpinning = false;
+    /* ---------- STATE ---------- */
+    let baseRotation = 0;
+    let multRotation = 0;
+    let isBaseSpinning = false;
+    let isMultSpinning = false;
     let total = 0;
     let spinCount = 0;
     let audioPrimed = false;
     let sendNowTimeoutId = null;
 
-    /* 4. LABELS ON BIGGER WHEEL */
-    function createLabels() {
+    /* ---------- LABELS ---------- */
+
+    function createBaseLabels() {
       const radius = 260; // tuned for 600px wheel
       prizes.forEach((value, index) => {
         const label = document.createElement("div");
         label.className = "wheel-label";
         label.textContent = "$" + value;
 
-        const angleDeg = index * sliceAngle;
+        const angleDeg = index * baseSliceAngle;
         const angleRad = (angleDeg - 90) * Math.PI / 180;
-
         const x = radius * Math.cos(angleRad);
         const y = radius * Math.sin(angleRad);
 
@@ -333,20 +460,33 @@
       });
     }
 
-    createLabels();
+    function createMultLabels() {
+      const radius = 135; // tuned for 350px wheel
+      multipliers.forEach((value, index) => {
+        const label = document.createElement("div");
+        label.className = "mult-label";
+        label.textContent = "x" + value.toString();
 
-    /* 5. WEIGHTED RANDOM PICK */
-    function pickWeightedIndex(weights) {
-      const sum = weights.reduce((a, b) => a + b, 0);
-      let r = Math.random() * sum;
-      for (let i = 0; i < weights.length; i++) {
-        r -= weights[i];
-        if (r <= 0) return i;
-      }
-      return weights.length - 1;
+        const angleDeg = index * multSliceAngle;
+        const angleRad = (angleDeg - 90) * Math.PI / 180;
+        const x = radius * Math.cos(angleRad);
+        const y = radius * Math.sin(angleRad);
+
+        label.style.transform =
+          `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+        multWheel.appendChild(label);
+      });
     }
 
-    /* 6. AUDIO HELPERS & PRIMING */
+    createBaseLabels();
+    createMultLabels();
+
+    /* ---------- UTIL ---------- */
+
+    function pickRandomIndex(len) {
+      return Math.floor(Math.random() * len);
+    }
+
     function playSoundSafe(audioEl) {
       if (!audioEl) return;
       try {
@@ -358,7 +498,6 @@
     function primeAudioIfNeeded() {
       if (audioPrimed) return;
       audioPrimed = true;
-
       const audios = [spinOink, winOinks, bigWinSound];
       audios.forEach(a => {
         if (!a) return;
@@ -375,7 +514,6 @@
       });
     }
 
-    /* 7. SHOW "SEND NOW PIGGY" FOR 4 SECONDS */
     function showSendNowPrompt() {
       if (sendNowTimeoutId !== null) {
         clearTimeout(sendNowTimeoutId);
@@ -386,13 +524,31 @@
       }, 4000);
     }
 
-    /* 8. SPIN LOGIC (HIDE BUTTON WHILE SPINNING) */
-    function spinWheel() {
-      if (isSpinning) return;
+    function showBigWin() {
+      bigWinOverlay.style.display = "block";
+      bigWinOverlay.style.animation = "none";
+      void bigWinOverlay.offsetWidth;
+      bigWinOverlay.style.animation = "piggy-pop 0.6s ease-out forwards";
+      playSoundSafe(bigWinSound);
+      setTimeout(() => {
+        bigWinOverlay.style.display = "none";
+      }, 3500);
+    }
+
+    function checkUnlockMultiplier() {
+      if (total >= 150) {
+        multWrapper.classList.add("unlocked");
+      }
+    }
+
+    /* ---------- MAIN CASH WHEEL SPIN ---------- */
+
+    function spinBaseWheel() {
+      if (isBaseSpinning || isMultSpinning) return;
 
       primeAudioIfNeeded();
 
-      isSpinning = true;
+      isBaseSpinning = true;
       spinBtn.disabled = true;
       spinBtn.style.display = "none";
       bigWinOverlay.style.display = "none";
@@ -400,38 +556,31 @@
 
       playSoundSafe(spinOink);
 
-      const targetIndex = pickWeightedIndex(prizeWeights);
+      const targetIndex = pickRandomIndex(prizes.length);
       const targetPrize = prizes[targetIndex];
 
-      const targetSliceAngle = targetIndex * sliceAngle;
+      const targetSliceAngle = targetIndex * baseSliceAngle;
       const desiredFinal = (360 - targetSliceAngle) % 360;
 
       const extraTurns = 2 + Math.floor(Math.random() * 4);
       const fullRotationDegrees = extraTurns * 360;
 
-      let delta = (desiredFinal - (currentRotation % 360) + 360) % 360;
-      const newRotation = currentRotation + fullRotationDegrees + delta;
+      let delta = (desiredFinal - (baseRotation % 360) + 360) % 360;
+      const newRotation = baseRotation + fullRotationDegrees + delta;
 
       wheel.style.transition =
         "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
       wheel.style.transform = `rotate(${newRotation}deg)`;
 
-      const onTransitionEnd = () => {
-        wheel.removeEventListener("transitionend", onTransitionEnd);
-        currentRotation = newRotation;
+      const onEnd = () => {
+        wheel.removeEventListener("transitionend", onEnd);
+        baseRotation = newRotation;
 
         playSoundSafe(winOinks);
 
-        if (targetPrize === 50 || targetPrize === 100 || targetPrize === 150) {
-          bigWinOverlay.style.display = "block";
-          bigWinOverlay.style.animation = "none";
-          void bigWinOverlay.offsetWidth;
-          bigWinOverlay.style.animation = "piggy-pop 0.6s ease-out forwards";
-          playSoundSafe(bigWinSound);
-
-          setTimeout(() => {
-            bigWinOverlay.style.display = "none";
-          }, 3500);
+        // Big win if we hit the top value (50)
+        if (targetPrize === 50) {
+          showBigWin();
         }
 
         total += targetPrize;
@@ -442,21 +591,99 @@
         spinCountEl.textContent = spinCount;
 
         const li = document.createElement("li");
-        li.textContent = `Spin ${spinCount}: $${targetPrize}`;
+        li.textContent = `Base spin ${spinCount}: $${targetPrize}`;
         historyEl.prepend(li);
 
-        // Show "Send Now Piggy" prompt
         showSendNowPrompt();
+        checkUnlockMultiplier();
 
-        isSpinning = false;
+        isBaseSpinning = false;
         spinBtn.disabled = false;
         spinBtn.style.display = "block";
       };
 
-      wheel.addEventListener("transitionend", onTransitionEnd);
+      wheel.addEventListener("transitionend", onEnd);
     }
 
-    /* 9. SHOW SESSION SUMMARY + RESET */
+    /* ---------- MULTIPLIER WHEEL SPIN ---------- */
+
+    function spinMultiplierWheel() {
+      if (isBaseSpinning || isMultSpinning) return;
+      if (total < 150) {
+        alert("Multiplier wheel unlocks after total reaches $150.");
+        return;
+      }
+
+      const lastText = lastResultEl.textContent;
+      if (lastText === "–") {
+        alert("Spin the main wheel at least once first.");
+        return;
+      }
+
+      primeAudioIfNeeded();
+
+      isMultSpinning = true;
+      multSpinBtn.disabled = true;
+      bigWinOverlay.style.display = "none";
+      sendNowOverlay.style.display = "none";
+
+      playSoundSafe(spinOink);
+
+      const targetIndex = pickRandomIndex(multipliers.length);
+      const multiplier = multipliers[targetIndex];
+
+      const targetSliceAngle = targetIndex * multSliceAngle;
+      const desiredFinal = (360 - targetSliceAngle) % 360;
+
+      const extraTurns = 2 + Math.floor(Math.random() * 4);
+      const fullRotationDegrees = extraTurns * 360;
+
+      let delta = (desiredFinal - (multRotation % 360) + 360) % 360;
+      const newRotation = multRotation + fullRotationDegrees + delta;
+
+      multWheel.style.transition =
+        "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
+      multWheel.style.transform = `rotate(${newRotation}deg)`;
+
+      const onEnd = () => {
+        multWheel.removeEventListener("transitionend", onEnd);
+        multRotation = newRotation;
+
+        playSoundSafe(winOinks);
+
+        // Multiplier applies to LAST win, and that payout is added to total
+        const baseAmount = parseInt(lastText, 10) || 0;
+        const raw = baseAmount * multiplier;
+        const payout = Math.round(raw / 5) * 5; // round to nearest $5
+
+        total += payout;
+        spinCount++;
+
+        totalEl.textContent = total;
+        lastResultEl.textContent = payout;
+        spinCountEl.textContent = spinCount;
+
+        const li = document.createElement("li");
+        li.textContent =
+          `Multiplier spin ${spinCount}: x${multiplier} on $${baseAmount} → $${payout}`;
+        historyEl.prepend(li);
+
+        if (payout >= 100) {
+          showBigWin();
+        }
+
+        showSendNowPrompt();
+        checkUnlockMultiplier();
+
+        isMultSpinning = false;
+        multSpinBtn.disabled = false;
+      };
+
+      multWheel.addEventListener("transitionend", onEnd);
+    }
+
+    /* ---------- RESET ---------- */
+
     function resetSession() {
       if (spinCount > 0) {
         const summary =
@@ -475,9 +702,12 @@
       historyEl.innerHTML = "";
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
+      multWrapper.classList.remove("unlocked");
     }
 
-    spinBtn.addEventListener("click", spinWheel);
+    /* ---------- EVENTS ---------- */
+    spinBtn.addEventListener("click", spinBaseWheel);
+    multSpinBtn.addEventListener("click", spinMultiplierWheel);
     resetBtn.addEventListener("click", resetSession);
   </script>
 </body>
