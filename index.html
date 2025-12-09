@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Cash Piggy Wheel 🐷💰 (Fixed)</title>
+  <title>Cash Piggy Wheel 🐷💰 (Final Fixed)</title>
   <style>
     /*
       =======================================================
-      CSS STYLES (NO CHANGES MADE TO ORIGINAL STYLING)
+      CSS STYLES
       =======================================================
     */
     body {
@@ -389,11 +389,13 @@
   <script>
     /*
       =======================================================
-      JAVASCRIPT LOGIC (FIXES APPLIED)
+      JAVASCRIPT LOGIC (FINAL FIXES APPLIED: Using setTimeout for reliable cleanup)
       =======================================================
     */
 
     /* ---------- DATA ---------- */
+
+    const ANIMATION_DURATION_MS = 8000;
 
     // Wheel 1: 5–50 in increments of 5 (randomized order)
     const basePrizes = [5,10,15,20,25,30,35,40,45,50];
@@ -548,8 +550,6 @@
     }
 
     /* ---------- MULTIPLIER WHEEL SPIN (AUTOMATIC) ---------- */
-    // FIX: Added setTimeout to reliably re-enable spin button after transition.
-    // FIX: Corrected logic to only add the NET GAIN (payout - baseAmount) to the total.
 
     function spinMultiplierAuto(baseAmount) {
       // isSpinning and spinBtn.disabled are ALREADY TRUE from spinBaseWheel
@@ -569,32 +569,31 @@
       const newRotation = multRotation + fullRotationDegrees + delta;
 
       multWheel.style.transition =
-        "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
+        `transform ${ANIMATION_DURATION_MS / 1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
       multWheel.style.transform = `rotate(${newRotation}deg)`;
 
       const onEnd = () => {
-        multWheel.removeEventListener("transitionend", onEnd);
         multRotation = newRotation;
 
         playSoundSafe(winOinks);
 
         const raw = baseAmount * multiplier;
-        const payout = Math.round(raw / 5) * 5; // round to nearest 5
+        const payout = Math.round(raw / 5) * 5; 
 
-        // Calculate and add only the net gain (since baseAmount was already added in spinBaseWheel)
+        // Calculate and add only the net gain 
         const netGain = payout - baseAmount;
         if (netGain > 0) {
             total += netGain;
         }
 
         totalEl.textContent = total;
-        lastResultEl.textContent = payout; // Last result is the total payout
+        lastResultEl.textContent = payout; 
 
         const li = document.createElement("li");
         li.textContent =
           `Multiplier spin: x${multiplier} on $${baseAmount} → Total Payout $${payout}`;
         historyEl.prepend(li);
-        historyEl.firstElementChild.style.fontWeight = 'bold'; // Highlight multiplier result
+        historyEl.firstElementChild.style.fontWeight = 'bold'; 
 
         if (payout >= 100) {
           showBigWin();
@@ -603,19 +602,16 @@
         showSendNowPrompt();
         checkUnlockMultiplier();
 
-        // Sequence finished: allow new spin by resetting flags
-        // Use a slight delay to ensure all animations/transitions have fully finished before re-enabling
-        setTimeout(() => {
-            isSpinning = false;
-            spinBtn.disabled = false;
-        }, 100); 
+        // **FIX**: The sequence is complete. Reliably re-enable the button.
+        isSpinning = false;
+        spinBtn.disabled = false;
       };
 
-      multWheel.addEventListener("transitionend", onEnd);
+      // **FIX**: Use reliable setTimeout based on duration instead of transitionend
+      setTimeout(onEnd, ANIMATION_DURATION_MS);
     }
 
     /* ---------- MAIN CASH WHEEL SPIN ---------- */
-    // FIX: Ensures flags are correctly reset whether or not the multiplier spins.
 
     function spinBaseWheel() {
       if (isSpinning) return;   // Block if *any* wheel is spinning
@@ -642,11 +638,10 @@
       const newRotation = baseRotation + fullRotationDegrees + delta;
 
       wheel.style.transition =
-        "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
+        `transform ${ANIMATION_DURATION_MS / 1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
       wheel.style.transform = `rotate(${newRotation}deg)`;
 
       const onEnd = () => {
-        wheel.removeEventListener("transitionend", onEnd);
         baseRotation = newRotation;
 
         playSoundSafe(winOinks);
@@ -681,7 +676,8 @@
         }
       };
 
-      wheel.addEventListener("transitionend", onEnd);
+      // **FIX**: Use reliable setTimeout based on duration instead of transitionend
+      setTimeout(onEnd, ANIMATION_DURATION_MS);
     }
 
     /* ---------- RESET ---------- */
