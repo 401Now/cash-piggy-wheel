@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Cash Piggy Wheel 🐷💰</title>
+  <title>Cash Piggy Wheel 🐷💰 (Fixed)</title>
   <style>
+    /*
+      =======================================================
+      CSS STYLES (NO CHANGES MADE TO ORIGINAL STYLING)
+      =======================================================
+    */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -329,9 +334,7 @@
 </head>
 <body>
   <div class="app">
-    <!-- MAIN + MULTIPLIER WHEELS IN A ROW -->
     <div class="wheels-row">
-      <!-- MAIN CASH WHEEL -->
       <div class="wheel-wrapper">
         <div class="pointer"></div>
         <div id="wheel" class="wheel"></div>
@@ -346,13 +349,11 @@
 
         <button id="spinBtn" class="spin-btn">Spin</button>
 
-        <!-- Audio -->
         <audio id="spinOink" src="pig-spin.mp3" preload="auto"></audio>
         <audio id="winOinks" src="pig-win.mp3" preload="auto"></audio>
         <audio id="bigWinSound" src="cash-win.mp3" preload="auto"></audio>
       </div>
 
-      <!-- MULTIPLIER WHEEL (LOCKED UNTIL TOTAL >= 150) -->
       <div id="multWrapper" class="mult-wrapper">
         <div class="mult-title">Multiplier Wheel</div>
         <div id="multLocked" class="mult-locked">
@@ -369,7 +370,6 @@
       </div>
     </div>
 
-    <!-- STATS / COUNTER -->
     <div class="sidebar">
       <h2>Cash Piggy 🐷</h2>
 
@@ -387,6 +387,12 @@
   </div>
 
   <script>
+    /*
+      =======================================================
+      JAVASCRIPT LOGIC (FIXES & REFACTORING APPLIED HERE)
+      =======================================================
+    */
+
     /* ---------- DATA ---------- */
 
     // Wheel 1: 5–50 in increments of 5 (randomized order)
@@ -411,7 +417,7 @@
     const prizes = shuffleArray(basePrizes);
     const multipliers = shuffleArray(baseMultipliers);
 
-    /* ---------- DOM ---------- */
+    /* ---------- DOM ELEMENTS ---------- */
     const wheel = document.getElementById("wheel");
     const spinBtn = document.getElementById("spinBtn");
     const resetBtn = document.getElementById("resetBtn");
@@ -440,7 +446,7 @@
     let audioPrimed = false;
     let sendNowTimeoutId = null;
 
-    /* ---------- LABELS ---------- */
+    /* ---------- LABEL GENERATION ---------- */
 
     function createBaseLabels() {
       const radius = 260; // tuned for 600px wheel
@@ -481,7 +487,7 @@
     createBaseLabels();
     createMultLabels();
 
-    /* ---------- UTIL ---------- */
+    /* ---------- UTIL FUNCTIONS ---------- */
 
     function pickRandomIndex(len) {
       return Math.floor(Math.random() * len);
@@ -541,15 +547,81 @@
       }
     }
 
+    /* ---------- MULTIPLIER WHEEL SPIN (AUTOMATIC) ---------- */
+    // FIXED: Corrected logic to only add the NET GAIN (payout - baseAmount) to the total.
+    // FIXED: Removed redundant spinCount++.
+
+    function spinMultiplierAuto(baseAmount) {
+      // baseAmount = the prize from the just-finished base spin
+      // isSpinning and spinBtn.disabled are ALREADY TRUE from spinBaseWheel
+
+      playSoundSafe(spinOink);
+
+      const targetIndex = pickRandomIndex(multipliers.length);
+      const multiplier = multipliers[targetIndex];
+
+      const targetSliceAngle = targetIndex * multSliceAngle;
+      const desiredFinal = (360 - targetSliceAngle) % 360;
+
+      const extraTurns = 2 + Math.floor(Math.random() * 4);
+      const fullRotationDegrees = extraTurns * 360;
+
+      let delta = (desiredFinal - (multRotation % 360) + 360) % 360;
+      const newRotation = multRotation + fullRotationDegrees + delta;
+
+      multWheel.style.transition =
+        "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
+      multWheel.style.transform = `rotate(${newRotation}deg)`;
+
+      const onEnd = () => {
+        multWheel.removeEventListener("transitionend", onEnd);
+        multRotation = newRotation;
+
+        playSoundSafe(winOinks);
+
+        const raw = baseAmount * multiplier;
+        const payout = Math.round(raw / 5) * 5; // round to nearest 5
+
+        // Calculate and add only the net gain (since baseAmount was already added in spinBaseWheel)
+        const netGain = payout - baseAmount;
+        if (netGain > 0) {
+            total += netGain;
+        }
+
+        totalEl.textContent = total;
+        lastResultEl.textContent = payout; // Last result is the total payout
+
+        const li = document.createElement("li");
+        li.textContent =
+          `Multiplier spin: x${multiplier} on $${baseAmount} → Total Payout $${payout}`;
+        historyEl.prepend(li);
+        historyEl.firstElementChild.style.fontWeight = 'bold'; // Highlight multiplier result
+
+        if (payout >= 100) {
+          showBigWin();
+        }
+
+        showSendNowPrompt();
+        checkUnlockMultiplier();
+
+        // Sequence finished: allow new spin by resetting flags
+        isSpinning = false;
+        spinBtn.disabled = false;
+      };
+
+      multWheel.addEventListener("transitionend", onEnd);
+    }
+
     /* ---------- MAIN CASH WHEEL SPIN ---------- */
+    // FIXED: Ensures flags are correctly reset whether or not the multiplier spins.
 
     function spinBaseWheel() {
-      if (isSpinning) return;   // block if anything is spinning
+      if (isSpinning) return;   // Block if *any* wheel is spinning
 
       primeAudioIfNeeded();
 
       isSpinning = true;
-      spinBtn.disabled = true;
+      spinBtn.disabled = true; // Disable the button while spinning
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
 
@@ -581,6 +653,7 @@
           showBigWin();
         }
 
+        // --- Stats Update (Base Spin) ---
         total += targetPrize;
         spinCount++;
 
@@ -595,77 +668,19 @@
         showSendNowPrompt();
         checkUnlockMultiplier();
 
-        // If unlocked, automatically spin multiplier wheel using this base prize
+        // Check if the multiplier is UNLOCKED AND we need to spin it automatically
         if (total >= 150) {
+          // Flags (isSpinning=true, spinBtn.disabled=true) remain set until 
+          // spinMultiplierAuto finishes.
           spinMultiplierAuto(targetPrize);
         } else {
-          // No multiplier yet, fully done
+          // The sequence is fully done, re-enable the main spin button and flags
           isSpinning = false;
           spinBtn.disabled = false;
         }
       };
 
       wheel.addEventListener("transitionend", onEnd);
-    }
-
-    /* ---------- MULTIPLIER WHEEL SPIN (AUTO AFTER UNLOCK) ---------- */
-
-    function spinMultiplierAuto(baseAmount) {
-      // baseAmount = the prize from the just-finished base spin
-      // assumes total >= 150 and isSpinning is already true
-
-      playSoundSafe(spinOink);
-
-      const targetIndex = pickRandomIndex(multipliers.length);
-      const multiplier = multipliers[targetIndex];
-
-      const targetSliceAngle = targetIndex * multSliceAngle;
-      const desiredFinal = (360 - targetSliceAngle) % 360;
-
-      const extraTurns = 2 + Math.floor(Math.random() * 4);
-      const fullRotationDegrees = extraTurns * 360;
-
-      let delta = (desiredFinal - (multRotation % 360) + 360) % 360;
-      const newRotation = multRotation + fullRotationDegrees + delta;
-
-      multWheel.style.transition =
-        "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
-      multWheel.style.transform = `rotate(${newRotation}deg)`;
-
-      const onEnd = () => {
-        multWheel.removeEventListener("transitionend", onEnd);
-        multRotation = newRotation;
-
-        playSoundSafe(winOinks);
-
-        const raw = baseAmount * multiplier;
-        const payout = Math.round(raw / 5) * 5; // round to nearest 5
-
-        total += payout;
-        spinCount++;
-
-        totalEl.textContent = total;
-        lastResultEl.textContent = payout;
-        spinCountEl.textContent = spinCount;
-
-        const li = document.createElement("li");
-        li.textContent =
-          `Multiplier spin ${spinCount}: x${multiplier} on $${baseAmount} → $${payout}`;
-        historyEl.prepend(li);
-
-        if (payout >= 100) {
-          showBigWin();
-        }
-
-        showSendNowPrompt();
-        checkUnlockMultiplier();
-
-        // sequence finished: allow new spin
-        isSpinning = false;
-        spinBtn.disabled = false;
-      };
-
-      multWheel.addEventListener("transitionend", onEnd);
     }
 
     /* ---------- RESET ---------- */
