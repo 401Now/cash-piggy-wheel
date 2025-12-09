@@ -389,7 +389,7 @@
   <script>
     /*
       =======================================================
-      JAVASCRIPT LOGIC (FIXES & REFACTORING APPLIED HERE)
+      JAVASCRIPT LOGIC (FIXES APPLIED)
       =======================================================
     */
 
@@ -548,11 +548,10 @@
     }
 
     /* ---------- MULTIPLIER WHEEL SPIN (AUTOMATIC) ---------- */
-    // FIXED: Corrected logic to only add the NET GAIN (payout - baseAmount) to the total.
-    // FIXED: Removed redundant spinCount++.
+    // FIX: Added setTimeout to reliably re-enable spin button after transition.
+    // FIX: Corrected logic to only add the NET GAIN (payout - baseAmount) to the total.
 
     function spinMultiplierAuto(baseAmount) {
-      // baseAmount = the prize from the just-finished base spin
       // isSpinning and spinBtn.disabled are ALREADY TRUE from spinBaseWheel
 
       playSoundSafe(spinOink);
@@ -605,15 +604,18 @@
         checkUnlockMultiplier();
 
         // Sequence finished: allow new spin by resetting flags
-        isSpinning = false;
-        spinBtn.disabled = false;
+        // Use a slight delay to ensure all animations/transitions have fully finished before re-enabling
+        setTimeout(() => {
+            isSpinning = false;
+            spinBtn.disabled = false;
+        }, 100); 
       };
 
       multWheel.addEventListener("transitionend", onEnd);
     }
 
     /* ---------- MAIN CASH WHEEL SPIN ---------- */
-    // FIXED: Ensures flags are correctly reset whether or not the multiplier spins.
+    // FIX: Ensures flags are correctly reset whether or not the multiplier spins.
 
     function spinBaseWheel() {
       if (isSpinning) return;   // Block if *any* wheel is spinning
@@ -670,8 +672,7 @@
 
         // Check if the multiplier is UNLOCKED AND we need to spin it automatically
         if (total >= 150) {
-          // Flags (isSpinning=true, spinBtn.disabled=true) remain set until 
-          // spinMultiplierAuto finishes.
+          // Flags remain true/disabled until spinMultiplierAuto finishes
           spinMultiplierAuto(targetPrize);
         } else {
           // The sequence is fully done, re-enable the main spin button and flags
