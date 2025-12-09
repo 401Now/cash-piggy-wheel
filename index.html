@@ -264,7 +264,7 @@
       font-size: 18px;
       z-index: 25;
       background: linear-gradient(135deg, #44ddaa, #11aa88);
-      display: none; /* hide manual button – multiplier is auto now */
+      display: none; /* hidden; multiplier is auto now */
     }
 
     /* ---------- STATS / COUNTER ---------- */
@@ -551,7 +551,6 @@
 
       isBaseSpinning = true;
       spinBtn.disabled = true;
-      spinBtn.style.display = "none";
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
 
@@ -606,7 +605,6 @@
         } else {
           // No multiplier yet, re-enable main spin
           spinBtn.disabled = false;
-          spinBtn.style.display = "block";
         }
       };
 
@@ -636,9 +634,8 @@
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
 
-      // Hide main spin button while multiplier runs
+      // Keep main spin visible but disabled while multiplier runs
       spinBtn.disabled = true;
-      spinBtn.style.display = "none";
 
       playSoundSafe(spinOink);
 
@@ -693,7 +690,6 @@
 
         // Re-enable main spin after multiplier auto-spin
         spinBtn.disabled = false;
-        spinBtn.style.display = "block";
       };
 
       multWheel.addEventListener("transitionend", onEnd);
@@ -723,7 +719,6 @@
       isBaseSpinning = false;
       isMultSpinning = false;
       spinBtn.disabled = false;
-      spinBtn.style.display = "block";
     }
 
     /* ---------- EVENTS ---------- */
