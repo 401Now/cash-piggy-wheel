@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Cash Piggy Wheel 🐷💰 (Final Fixed)</title>
+  <title>Cash Piggy Wheel 🐷💰 (Video Trigger $100 Increment)</title>
   <style>
     /*
       =======================================================
@@ -18,6 +18,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      overflow: hidden; /* Prevent scrolling when modal is open */
     }
 
     .app {
@@ -97,24 +98,9 @@
       z-index: 20;
     }
 
-    /* Big win overlay */
+    /* Big win overlay (Original text version - now hidden for video) */
     .big-win-overlay {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.5);
-      padding: 12px 22px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.8);
-      border: 2px solid #00ff66;
-      color: #00ff66;
-      font-size: 22px;
-      font-weight: bold;
-      text-shadow: 0 0 6px #000;
-      display: none;
-      white-space: nowrap;
-      z-index: 40;
-      animation: piggy-pop 0.6s ease-out forwards;
+      display: none; 
     }
 
     /* "Send Now Piggy" overlay */
@@ -329,11 +315,68 @@
       color: #eee;
       cursor: pointer;
     }
+    
+    /* ---------- VIDEO MODAL STYLES (NEW) ---------- */
+    .video-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      display: none; /* Hidden by default */
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .video-container {
+      position: relative;
+      width: 90%;
+      max-width: 800px; /* Adjust size as needed */
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 30px rgba(0, 255, 102, 0.8);
+      border: 5px solid #00ff66;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 5px;
+      right: 15px;
+      color: #00ff66;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 1;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .close-btn:hover {
+      opacity: 1;
+    }
+
+    #piggyVideo {
+      width: 100%;
+      max-height: 80vh; /* Responsive height */
+    }
 
   </style>
 </head>
 <body>
   <div class="app">
+    <div id="videoModal" class="video-modal-overlay">
+      <div class="video-container">
+        <span class="close-btn" id="closeVideoBtn">&times;</span>
+        <video id="piggyVideo" controls preload="auto">
+          <source src="piggy-video.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+    
     <div class="wheels-row">
       <div class="wheel-wrapper">
         <div class="pointer"></div>
@@ -389,13 +432,14 @@
   <script>
     /*
       =======================================================
-      JAVASCRIPT LOGIC (FINAL FIXES APPLIED: Using setTimeout for reliable cleanup)
+      JAVASCRIPT LOGIC (FIXED SPIN + VIDEO TRIGGER AT $100 MULTIPLES)
       =======================================================
     */
 
     /* ---------- DATA ---------- */
 
     const ANIMATION_DURATION_MS = 8000;
+    const TRIGGER_AMOUNT = 100; // Constant for the video trigger amount
 
     // Wheel 1: 5–50 in increments of 5 (randomized order)
     const basePrizes = [5,10,15,20,25,30,35,40,45,50];
@@ -428,16 +472,23 @@
 
     const multWrapper = document.getElementById("multWrapper");
     const multWheel = document.getElementById("multWheel");
-    const multSpinBtn = document.getElementById("multSpinBtn");
+    // const multSpinBtn = document.getElementById("multSpinBtn"); // Not used as spin is automatic
 
     const totalEl = document.getElementById("total");
     const lastResultEl = document.getElementById("lastResult");
     const spinCountEl = document.getElementById("spinCount");
     const historyEl = document.getElementById("history");
 
+    // Audio elements
     const spinOink = document.getElementById("spinOink");
     const winOinks = document.getElementById("winOinks");
     const bigWinSound = document.getElementById("bigWinSound");
+
+    // Video modal elements
+    const videoModal = document.getElementById("videoModal");
+    const piggyVideo = document.getElementById("piggyVideo");
+    const closeVideoBtn = document.getElementById("closeVideoBtn");
+
 
     /* ---------- STATE ---------- */
     let baseRotation = 0;
@@ -451,7 +502,7 @@
     /* ---------- LABEL GENERATION ---------- */
 
     function createBaseLabels() {
-      const radius = 260; // tuned for 600px wheel
+      const radius = 260; 
       prizes.forEach((value, index) => {
         const label = document.createElement("div");
         label.className = "wheel-label";
@@ -469,7 +520,7 @@
     }
 
     function createMultLabels() {
-      const radius = 135; // tuned for 350px wheel
+      const radius = 135; 
       multipliers.forEach((value, index) => {
         const label = document.createElement("div");
         label.className = "mult-label";
@@ -531,16 +582,28 @@
         sendNowOverlay.style.display = "none";
       }, 4000);
     }
+    
+    // Function to check for $100 increment and show video (ONCE per spin)
+    function checkAndShowVideo(previousTotal) {
+      const currentMultiple = Math.floor(total / TRIGGER_AMOUNT) * TRIGGER_AMOUNT;
+      const previousMultiple = Math.floor(previousTotal / TRIGGER_AMOUNT) * TRIGGER_AMOUNT;
 
-    function showBigWin() {
-      bigWinOverlay.style.display = "block";
-      bigWinOverlay.style.animation = "none";
-      void bigWinOverlay.offsetWidth;
-      bigWinOverlay.style.animation = "piggy-pop 0.6s ease-out forwards";
-      playSoundSafe(bigWinSound);
-      setTimeout(() => {
-        bigWinOverlay.style.display = "none";
-      }, 3500);
+      // Only trigger if we crossed a NEW $100 multiple
+      if (currentMultiple > 0 && currentMultiple > previousMultiple) {
+        showBigWinVideo();
+      }
+    }
+
+    function showBigWinVideo() {
+      videoModal.style.display = "flex";
+      piggyVideo.play();
+      playSoundSafe(bigWinSound); 
+    }
+
+    function hideBigWinVideo() {
+        videoModal.style.display = "none";
+        piggyVideo.pause();
+        piggyVideo.currentTime = 0;
     }
 
     function checkUnlockMultiplier() {
@@ -552,7 +615,7 @@
     /* ---------- MULTIPLIER WHEEL SPIN (AUTOMATIC) ---------- */
 
     function spinMultiplierAuto(baseAmount) {
-      // isSpinning and spinBtn.disabled are ALREADY TRUE from spinBaseWheel
+      const previousTotal = total; // Store total before calculating net gain
 
       playSoundSafe(spinOink);
 
@@ -595,33 +658,34 @@
         historyEl.prepend(li);
         historyEl.firstElementChild.style.fontWeight = 'bold'; 
 
-        if (payout >= 100) {
-          showBigWin();
-        }
+        // CHECK FOR $100 INCREMENT
+        checkAndShowVideo(previousTotal);
 
         showSendNowPrompt();
         checkUnlockMultiplier();
 
-        // **FIX**: The sequence is complete. Reliably re-enable the button.
         isSpinning = false;
         spinBtn.disabled = false;
       };
 
-      // **FIX**: Use reliable setTimeout based on duration instead of transitionend
       setTimeout(onEnd, ANIMATION_DURATION_MS);
     }
 
     /* ---------- MAIN CASH WHEEL SPIN ---------- */
 
     function spinBaseWheel() {
-      if (isSpinning) return;   // Block if *any* wheel is spinning
+      if (isSpinning) return;   
 
       primeAudioIfNeeded();
 
       isSpinning = true;
-      spinBtn.disabled = true; // Disable the button while spinning
-      bigWinOverlay.style.display = "none";
+      spinBtn.disabled = true; 
+      // Big win overlay is no longer needed but we ensure its hidden
+      bigWinOverlay.style.display = "none"; 
       sendNowOverlay.style.display = "none";
+      hideBigWinVideo(); // Ensure video is closed before starting new spin
+      
+      const previousTotal = total; // Store total before adding new prize
 
       playSoundSafe(spinOink);
 
@@ -646,10 +710,6 @@
 
         playSoundSafe(winOinks);
 
-        if (targetPrize === 50) {
-          showBigWin();
-        }
-
         // --- Stats Update (Base Spin) ---
         total += targetPrize;
         spinCount++;
@@ -661,13 +721,16 @@
         const li = document.createElement("li");
         li.textContent = `Base spin ${spinCount}: $${targetPrize}`;
         historyEl.prepend(li);
+        
+        // CHECK FOR $100 INCREMENT
+        checkAndShowVideo(previousTotal);
+
 
         showSendNowPrompt();
         checkUnlockMultiplier();
 
         // Check if the multiplier is UNLOCKED AND we need to spin it automatically
         if (total >= 150) {
-          // Flags remain true/disabled until spinMultiplierAuto finishes
           spinMultiplierAuto(targetPrize);
         } else {
           // The sequence is fully done, re-enable the main spin button and flags
@@ -676,7 +739,6 @@
         }
       };
 
-      // **FIX**: Use reliable setTimeout based on duration instead of transitionend
       setTimeout(onEnd, ANIMATION_DURATION_MS);
     }
 
@@ -703,15 +765,25 @@
       multWrapper.classList.remove("unlocked");
       isSpinning = false;
       spinBtn.disabled = false;
+      hideBigWinVideo();
     }
 
     /* ---------- EVENTS ---------- */
     spinBtn.addEventListener("click", spinBaseWheel);
     // Manual multiplier button still wired but hidden
-    multSpinBtn.addEventListener("click", () => {
-      alert("Multiplier spins automatically after unlock.");
-    });
+    const multSpinBtnElement = document.getElementById("multSpinBtn");
+    if (multSpinBtnElement) {
+        multSpinBtnElement.addEventListener("click", () => {
+            alert("Multiplier spins automatically after unlock.");
+        });
+    }
     resetBtn.addEventListener("click", resetSession);
+    
+    // Close button for video modal
+    closeVideoBtn.addEventListener("click", hideBigWinVideo);
+    
+    // Close modal if video finishes playing
+    piggyVideo.addEventListener('ended', hideBigWinVideo);
   </script>
 </body>
 </html>
