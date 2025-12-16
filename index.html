@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Cash Piggy Wheel 🐷💰 (Final Fixed)</title>
+  <title>Cash Piggy Wheel 🐷💰 (Video Trigger $100 Increment)</title>
   <style>
     /*
       =======================================================
@@ -18,6 +18,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      overflow: hidden; /* Prevent scrolling when modal is open */
     }
 
     .app {
@@ -35,6 +36,756 @@
       gap: 16px;
     }
 
+    /* ---------- MAIN WHEEL (600px) ---------- */
+    .wheel-wrapper {
+      position: relative;
+      width: 640px;
+      height: 640px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wheel {
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      border: 10px solid #ff66aa;
+      box-shadow: 0 0 24px rgba(0,0,0,0.9);
+      position: relative;
+      transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1);
+      transform: rotate(0deg);
+      /* 10 equal slices = 36deg each */
+      background: conic-gradient(
+        #c40000 0deg 36deg,
+        #000000 36deg 72deg,
+        #c40000 72deg 108deg,
+        #000000 108deg 144deg,
+        #c40000 144deg 180deg,
+        #000000 180deg 216deg,
+        #c40000 216deg 252deg,
+        #000000 252deg 288deg,
+        #c40000 288deg 324deg,
+        #000000 324deg 360deg
+      );
+    }
+
+    .wheel-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: center center;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+      text-shadow: 0 0 3px #000;
+      width: 80px;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 22px solid transparent;
+      border-right: 22px solid transparent;
+      border-bottom: 34px solid #ffffff;
+      filter: drop-shadow(0 0 4px #000);
+      z-index: 20;
+    }
+
+    /* Big win overlay (Text version is now obsolete/commented out for video) */
+    .big-win-overlay {
+      display: none; 
+    }
+
+    /* "Send Now Piggy" overlay */
+    .send-now-overlay {
+      position: absolute;
+      top: 80%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid #ffcc00;
+      color: #ffcc00;
+      font-size: 24px;
+      font-weight: 900;
+      text-shadow: 0 0 6px #000;
+      display: none;
+      white-space: nowrap;
+      z-index: 40;
+      animation: send-flash 1s linear infinite;
+    }
+
+    @keyframes piggy-pop {
+      0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+      50%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    @keyframes send-flash {
+      0%   { opacity: 0.1; transform: translate(-50%, -50%) scale(0.95); }
+      50%  { opacity: 1;   transform: translate(-50%, -50%) scale(1.05); }
+      100% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.98); }
+    }
+
+    .spin-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 14px 32px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ff66aa, #ff3366);
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 0 12px rgba(0,0,0,0.8);
+      z-index: 35;
+    }
+    .spin-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* ---------- MULTIPLIER WHEEL (350px) ---------- */
+    .mult-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .mult-title {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
+    .mult-locked {
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid #888;
+      color: #ddd;
+      white-space: nowrap;
+    }
+
+    .mult-inner {
+      position: relative;
+      width: 380px;
+      height: 380px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mult-wrapper.unlocked .mult-inner {
+      display: flex;
+    }
+    .mult-wrapper.unlocked .mult-locked {
+      display: none;
+    }
+
+    .mult-wheel {
+      width: 350px;
+      height: 350px;
+      border-radius: 50%;
+      border: 8px solid #44ddaa;
+      box-shadow: 0 0 18px rgba(0,0,0,0.9);
+      position: relative;
+      transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1);
+      transform: rotate(0deg);
+      background: conic-gradient(
+        #146b3a 0deg 45deg,
+        #f8b229 45deg 90deg,
+        #146b3a 90deg 135deg,
+        #f8b229 135deg 180deg,
+        #146b3a 180deg 225deg,
+        #f8b229 225deg 270deg,
+        #146b3a 270deg 315deg,
+        #f8b229 315deg 360deg
+      );
+    }
+
+    .mult-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: center center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 0 0 3px #000;
+      width: 80px;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .mult-pointer {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-bottom: 30px solid #ffffff;
+      filter: drop-shadow(0 0 4px #000);
+      z-index: 20;
+    }
+
+    .mult-spin-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 10px 24px;
+      font-size: 18px;
+      z-index: 25;
+      background: linear-gradient(135deg, #44ddaa, #11aa88);
+      display: none; /* hidden; multiplier is auto */
+    }
+
+    /* ---------- STATS / COUNTER ---------- */
+    .sidebar {
+      width: 100%;
+      max-width: 520px;
+      background: #181818;
+      border-radius: 12px;
+      padding: 20px 22px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.7);
+      text-align: center;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 24px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .history-title {
+      margin-top: 12px;
+      font-size: 18px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 5px;
+    }
+
+    .history {
+      list-style: none;
+      padding-left: 0;
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 15px;
+      text-align: left;
+      margin: 0;
+    }
+
+    .history li {
+      padding: 3px 0;
+    }
+
+    .reset-btn {
+      margin-top: 12px;
+      padding: 8px 14px;
+      font-size: 15px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #222;
+      color: #eee;
+      cursor: pointer;
+    }
+    
+    /* ---------- VIDEO MODAL STYLES (NEW) ---------- */
+    .video-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      display: none; /* Hidden by default */
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .video-container {
+      position: relative;
+      width: 90%;
+      max-width: 800px; /* Adjust size as needed */
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 30px rgba(0, 255, 102, 0.8);
+      border: 5px solid #00ff66;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 5px;
+      right: 15px;
+      color: #00ff66;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 1;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .close-btn:hover {
+      opacity: 1;
+    }
+
+    #piggyVideo {
+      width: 100%;
+      max-height: 80vh; /* Responsive height */
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="videoModal" class="video-modal-overlay">
+      <div class="video-container">
+        <span class="close-btn" id="closeVideoBtn">&times;</span>
+        <video id="piggyVideo" controls preload="auto">
+          <source src="piggy-video.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+    
+    <div class="wheels-row">
+      <div class="wheel-wrapper">
+        <div class="pointer"></div>
+        <div id="wheel" class="wheel"></div>
+
+        <div id="bigWinOverlay" class="big-win-overlay">
+          🐷💰 CASH PIGGY BIG WIN! 💰🐷
+        </div>
+
+        <div id="sendNowOverlay" class="send-now-overlay">
+          SEND NOW PIGGY
+        </div>
+
+        <button id="spinBtn" class="spin-btn">Spin</button>
+
+        <audio id="spinOink" src="pig-spin.mp3" preload="auto"></audio>
+        <audio id="winOinks" src="pig-win.mp3" preload="auto"></audio>
+        <audio id="bigWinSound" src="cash-win.mp3" preload="auto"></audio>
+      </div>
+
+      <div id="multWrapper" class="mult-wrapper">
+        <div class="mult-title">Multiplier Wheel</div>
+        <div id="multLocked" class="mult-locked">
+          🔒 Locked – reach $150 total to unlock
+        </div>
+
+        <div class="mult-inner">
+          <div class="mult-pointer"></div>
+          <div id="multWheel" class="mult-wheel"></div>
+          <button id="multSpinBtn" class="spin-btn mult-spin-btn">
+            Spin Multiplier
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <h2>Cash Piggy 🐷</h2>
+
+      <div class="stats-row">
+        <div>Total: <strong>$<span id="total">0</span></strong></div>
+        <div>Spins: <strong><span id="spinCount">0</span></strong></div>
+        <div>Last: <strong>$<span id="lastResult">–</span></strong></div>
+      </div>
+
+      <div class="history-title">Spin history</div>
+      <ul id="history" class="history"></ul>
+
+      <button id="resetBtn" class="reset-btn">Reset session</button>
+    </div>
+  </div>
+
+  <script>
+    /*
+      =======================================================
+      JAVASCRIPT LOGIC (FIXED SPIN + VIDEO TRIGGER AT $100 MULTIPLES)
+      =======================================================
+    */
+
+    /* ---------- DATA ---------- */
+
+    const ANIMATION_DURATION_MS = 8000;
+    const TRIGGER_AMOUNT = 100; // Updated constant for the video trigger amount
+
+    // Wheel 1: 5–50 in increments of 5 (randomized order)
+    const basePrizes = [5,10,15,20,25,30,35,40,45,50];
+    const baseSliceCount = basePrizes.length;
+    const baseSliceAngle = 360 / baseSliceCount;
+
+    // Multiplier wheel: unlocks at total >= 150
+    const baseMultipliers = [1.25,1.5,1.75,2,2.25,2.5,2.75,3];
+    const multSliceCount = baseMultipliers.length;
+    const multSliceAngle = 360 / multSliceCount;
+
+    function shuffleArray(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const prizes = shuffleArray(basePrizes);
+    const multipliers = shuffleArray(baseMultipliers);
+
+    /* ---------- DOM ELEMENTS ---------- */
+    const wheel = document.getElementById("wheel");
+    const spinBtn = document.getElementById("spinBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const bigWinOverlay = document.getElementById("bigWinOverlay");
+    const sendNowOverlay = document.getElementById("sendNowOverlay");
+
+    const multWrapper = document.getElementById("multWrapper");
+    const multWheel = document.getElementById("multWheel");
+    const multSpinBtn = document.getElementById("multSpinBtn");
+
+    const totalEl = document.getElementById("total");
+    const lastResultEl = document.getElementById("lastResult");
+    const spinCountEl = document.getElementById("spinCount");
+    const historyEl = document.getElementById("history");
+
+    // Audio elements
+    const spinOink = document.getElementById("spinOink");
+    const winOinks = document.getElementById("winOinks");
+    const bigWinSound = document.getElementById("bigWinSound");
+
+    // Video modal elements
+    const videoModal = document.getElementById("videoModal");
+    const piggyVideo = document.getElementById("piggyVideo");
+    const closeVideoBtn = document.getElementById("closeVideoBtn");
+
+
+    /* ---------- STATE ---------- */
+    let baseRotation = 0;
+    let multRotation = 0;
+    let isSpinning = false;      // single flag for both wheels
+    let total = 0;
+    let spinCount = 0;
+    let audioPrimed = false;
+    let sendNowTimeoutId = null;
+
+    /* ---------- LABEL GENERATION ---------- */
+
+    function createBaseLabels() {
+      const radius = 260; 
+      prizes.forEach((value, index) => {
+        const label = document.createElement("div");
+        label.className = "wheel-label";
+        label.textContent = "$" + value;
+
+        const angleDeg = index * baseSliceAngle;
+        const angleRad = (angleDeg - 90) * Math.PI / 180;
+        const x = radius * Math.cos(angleRad);
+        const y = radius * Math.sin(angleRad);
+
+        label.style.transform =
+          `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+        wheel.appendChild(label);
+      });
+    }
+
+    function createMultLabels() {
+      const radius = 135; 
+      multipliers.forEach((value, index) => {
+        const label = document.createElement("div");
+        label.className = "mult-label";
+        label.textContent = "x" + value.toString();
+
+        const angleDeg = index * multSliceAngle;
+        const angleRad = (angleDeg - 90) * Math.PI / 180;
+        const x = radius * Math.cos(angleRad);
+        const y = radius * Math.sin(angleRad);
+
+        label.style.transform =
+          `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+        multWheel.appendChild(label);
+      });
+    }
+
+    createBaseLabels();
+    createMultLabels();
+
+    /* ---------- UTIL FUNCTIONS ---------- */
+
+    function pickRandomIndex(len) {
+      return Math.floor(Math.random() * len);
+    }
+
+    function playSoundSafe(audioEl) {
+      if (!audioEl) return;
+      try {
+        audioEl.currentTime = 0;
+        audioEl.play().catch(() => {});
+      } catch (e) {}
+    }
+
+    function primeAudioIfNeeded() {
+      if (audioPrimed) return;
+      audioPrimed = true;
+      const audios = [spinOink, winOinks, bigWinSound];
+      audios.forEach(a => {
+        if (!a) return;
+        const originalVolume = a.volume;
+        a.volume = 0;
+        a.play().catch(() => {});
+        setTimeout(() => {
+          try {
+            a.pause();
+            a.currentTime = 0;
+          } catch (e) {}
+          a.volume = originalVolume;
+        }, 200);
+      });
+    }
+
+    function showSendNowPrompt() {
+      if (sendNowTimeoutId !== null) {
+        clearTimeout(sendNowTimeoutId);
+      }
+      sendNowOverlay.style.display = "block";
+      sendNowTimeoutId = setTimeout(() => {
+        sendNowOverlay.style.display = "none";
+      }, 4000);
+    }
+
+    // UPDATED: Function to check for $100 increment and show video
+    function checkAndShowVideo(previousTotal) {
+      // Find the multiple of TRIGGER_AMOUNT (100) that the new total is currently in
+      const currentMultiple = Math.floor(total / TRIGGER_AMOUNT) * TRIGGER_AMOUNT;
+      
+      // Find the multiple of TRIGGER_AMOUNT (100) that the previous total was in
+      const previousMultiple = Math.floor(previousTotal / TRIGGER_AMOUNT) * TRIGGER_AMOUNT;
+
+      // Check if we have crossed a NEW multiple
+      if (currentMultiple > 0 && currentMultiple > previousMultiple) {
+        // Trigger the video only if we crossed a new $100 threshold
+        showBigWinVideo();
+      }
+    }
+
+    function showBigWinVideo() {
+      videoModal.style.display = "flex";
+      piggyVideo.play();
+      playSoundSafe(bigWinSound); 
+    }
+
+    function hideBigWinVideo() {
+        videoModal.style.display = "none";
+        piggyVideo.pause();
+        piggyVideo.currentTime = 0;
+    }
+
+    function checkUnlockMultiplier() {
+      if (total >= 150) {
+        multWrapper.classList.add("unlocked");
+      }
+    }
+
+    /* ---------- MULTIPLIER WHEEL SPIN (AUTOMATIC) ---------- */
+
+    function spinMultiplierAuto(baseAmount) {
+      const previousTotal = total; // Store total before calculating net gain
+
+      playSoundSafe(spinOink);
+
+      const targetIndex = pickRandomIndex(multipliers.length);
+      const multiplier = multipliers[targetIndex];
+
+      const targetSliceAngle = targetIndex * multSliceAngle;
+      const desiredFinal = (360 - targetSliceAngle) % 360;
+
+      const extraTurns = 2 + Math.floor(Math.random() * 4);
+      const fullRotationDegrees = extraTurns * 360;
+
+      let delta = (desiredFinal - (multRotation % 360) + 360) % 360;
+      const newRotation = multRotation + fullRotationDegrees + delta;
+
+      multWheel.style.transition =
+        `transform ${ANIMATION_DURATION_MS / 1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
+      multWheel.style.transform = `rotate(${newRotation}deg)`;
+
+      const onEnd = () => {
+        multRotation = newRotation;
+
+        playSoundSafe(winOinks);
+
+        const raw = baseAmount * multiplier;
+        const payout = Math.round(raw / 5) * 5; 
+
+        // Calculate and add only the net gain 
+        const netGain = payout - baseAmount;
+        if (netGain > 0) {
+            total += netGain;
+        }
+
+        totalEl.textContent = total;
+        lastResultEl.textContent = payout; 
+
+        const li = document.createElement("li");
+        li.textContent =
+          `Multiplier spin: x${multiplier} on $${baseAmount} → Total Payout $${payout}`;
+        historyEl.prepend(li);
+        historyEl.firstElementChild.style.fontWeight = 'bold'; 
+
+        // CHECK FOR $100 INCREMENT
+        checkAndShowVideo(previousTotal);
+
+        showSendNowPrompt();
+        checkUnlockMultiplier();
+
+        isSpinning = false;
+        spinBtn.disabled = false;
+      };
+
+      setTimeout(onEnd, ANIMATION_DURATION_MS);
+    }
+
+    /* ---------- MAIN CASH WHEEL SPIN ---------- */
+
+    function spinBaseWheel() {
+      if (isSpinning) return;   
+
+      primeAudioIfNeeded();
+
+      isSpinning = true;
+      spinBtn.disabled = true; 
+      bigWinOverlay.style.display = "none";
+      sendNowOverlay.style.display = "none";
+      hideBigWinVideo(); // Ensure video is closed before starting new spin
+      
+      const previousTotal = total; // Store total before adding new prize
+
+      playSoundSafe(spinOink);
+
+      const targetIndex = pickRandomIndex(prizes.length);
+      const targetPrize = prizes[targetIndex];
+
+      const targetSliceAngle = targetIndex * baseSliceAngle;
+      const desiredFinal = (360 - targetSliceAngle) % 360;
+
+      const extraTurns = 2 + Math.floor(Math.random() * 4);
+      const fullRotationDegrees = extraTurns * 360;
+
+      let delta = (desiredFinal - (baseRotation % 360) + 360) % 360;
+      const newRotation = baseRotation + fullRotationDegrees + delta;
+
+      wheel.style.transition =
+        `transform ${ANIMATION_DURATION_MS / 1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
+      wheel.style.transform = `rotate(${newRotation}deg)`;
+
+      const onEnd = () => {
+        baseRotation = newRotation;
+
+        playSoundSafe(winOinks);
+
+        // --- Stats Update (Base Spin) ---
+        total += targetPrize;
+        spinCount++;
+
+        totalEl.textContent = total;
+        lastResultEl.textContent = targetPrize;
+        spinCountEl.textContent = spinCount;
+
+        const li = document.createElement("li");
+        li.textContent = `Base spin ${spinCount}: $${targetPrize}`;
+        historyEl.prepend(li);
+        
+        // CHECK FOR $100 INCREMENT
+        checkAndShowVideo(previousTotal);
+
+
+        showSendNowPrompt();
+        checkUnlockMultiplier();
+
+        // Check if the multiplier is UNLOCKED AND we need to spin it automatically
+        if (total >= 150) {
+          spinMultiplierAuto(targetPrize);
+        } else {
+          // The sequence is fully done, re-enable the main spin button and flags
+          isSpinning = false;
+          spinBtn.disabled = false;
+        }
+      };
+
+      setTimeout(onEnd, ANIMATION_DURATION_MS);
+    }
+
+    /* ---------- RESET ---------- */
+
+    function resetSession() {
+      if (spinCount > 0) {
+        const summary =
+          `Cash Piggy Session Summary\n\n` +
+          `Spins: ${spinCount}\n` +
+          `Total: $${total}\n\n` +
+          `Last spin: ${lastResultEl.textContent === "–" ? "N/A" : "$" + lastResultEl.textContent}`;
+        alert(summary);
+      }
+
+      total = 0;
+      spinCount = 0;
+      totalEl.textContent = "0";
+      spinCountEl.textContent = "0";
+      lastResultEl.textContent = "–";
+      historyEl.innerHTML = "";
+      bigWinOverlay.style.display = "none";
+      sendNowOverlay.style.display = "none";
+      multWrapper.classList.remove("unlocked");
+      isSpinning = false;
+      spinBtn.disabled = false;
+      hideBigWinVideo();
+    }
+
+    /* ---------- EVENTS ---------- */
+    spinBtn.addEventListener("click", spinBaseWheel);
+    multSpinBtn.addEventListener("click", () => {
+      alert("Multiplier spins automatically after unlock.");
+    });
+    resetBtn.addEventListener("click", resetSession);
+    
+    // Close button for video modal
+    closeVideoBtn.addEventListener("click", hideBigWinVideo);
+    
+    // Close modal if video finishes playing
+    piggyVideo.addEventListener('ended', hideBigWinVideo);
+  </script>
+</body>
+</html>
     /* ---------- MAIN WHEEL (600px) ---------- */
     .wheel-wrapper {
       position: relative;
