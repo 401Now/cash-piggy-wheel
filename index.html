@@ -316,7 +316,7 @@
       cursor: pointer;
     }
     
-    /* ---------- VIDEO MODAL STYLES (NEW) ---------- */
+    /* ---------- VIDEO MODAL STYLES ---------- */
     .video-modal-overlay {
       position: fixed;
       top: 0;
@@ -324,7 +324,7 @@
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.95);
-      display: none; /* Hidden by default */
+      display: none; 
       justify-content: center;
       align-items: center;
       z-index: 100;
@@ -333,7 +333,7 @@
     .video-container {
       position: relative;
       width: 90%;
-      max-width: 800px; /* Adjust size as needed */
+      max-width: 800px; 
       background: #111;
       padding: 20px;
       border-radius: 10px;
@@ -360,7 +360,7 @@
 
     #piggyVideo {
       width: 100%;
-      max-height: 80vh; /* Responsive height */
+      max-height: 80vh; 
     }
 
   </style>
@@ -387,8 +387,7 @@
         </div>
 
         <div id="sendNowOverlay" class="send-now-overlay">
-          SEND NOW PIGGY
-        </div>
+          </div>
 
         <button id="spinBtn" class="spin-btn">Spin</button>
 
@@ -417,9 +416,9 @@
       <h2>Cash Piggy 🐷</h2>
 
       <div class="stats-row">
-        <div>Total: <strong>$<span id="total">220</span></strong></div>
-        <div>Spins: <strong><span id="spinCount">7</span></strong></div>
-        <div>Last: <strong>$<span id="lastResult">55</span></strong></div>
+        <div>Total: <strong>$<span id="total">0</span></strong></div>
+        <div>Spins: <strong><span id="spinCount">0</span></strong></div>
+        <div>Last: <strong>$<span id="lastResult">–</span></strong></div>
       </div>
 
       <div class="history-title">Spin history</div>
@@ -520,7 +519,7 @@
             multWrapper.classList.add("unlocked");
         }
     }
-    initializeState();
+    // initializeState(); // We are starting from 0, so initialization on load is not strictly necessary but included for completeness.
 
     /* ---------- LABEL GENERATION ---------- */
 
@@ -596,14 +595,13 @@
       });
     }
     
-    // UPDATED: Selects a random caption and displays it
     function showRandomCaption() {
       if (sendNowTimeoutId !== null) {
         clearTimeout(sendNowTimeoutId);
       }
       
       const randomIndex = Math.floor(Math.random() * randomCaptions.length);
-      sendNowOverlay.textContent = randomCaptions[randomIndex]; // Set the new text
+      sendNowOverlay.textContent = randomCaptions[randomIndex]; 
       sendNowOverlay.style.display = "block";
       
       sendNowTimeoutId = setTimeout(() => {
@@ -611,12 +609,10 @@
       }, 4000);
     }
 
-    // Function to check for $100 increment and show video (ONCE per spin)
     function checkAndShowVideo(previousTotal) {
       const currentMultiple = Math.floor(total / TRIGGER_AMOUNT) * TRIGGER_AMOUNT;
       const previousMultiple = Math.floor(previousTotal / TRIGGER_AMOUNT) * TRIGGER_AMOUNT;
 
-      // Only trigger if we crossed a NEW $100 multiple
       if (currentMultiple > 0 && currentMultiple > previousMultiple) {
         showBigWinVideo();
       }
@@ -643,60 +639,67 @@
     /* ---------- MULTIPLIER WHEEL SPIN (AUTOMATIC) ---------- */
 
     function spinMultiplierAuto(baseAmount) {
-      const previousTotal = total; // Store total before calculating net gain
+      const previousTotal = total; 
 
-      playSoundSafe(spinOink);
+      // 1. Ensure the multiplier is visually unlocked before trying to spin
+      checkUnlockMultiplier();
 
-      const targetIndex = pickRandomIndex(multipliers.length);
-      const multiplier = multipliers[targetIndex];
+      // Fix: Add a short delay to ensure the browser registers the visual change (display:flex)
+      // before attempting to apply the animation transform.
+      setTimeout(() => { 
+        
+        playSoundSafe(spinOink);
 
-      const targetSliceAngle = targetIndex * multSliceAngle;
-      const desiredFinal = (360 - targetSliceAngle) % 360;
+        const targetIndex = pickRandomIndex(multipliers.length);
+        const multiplier = multipliers[targetIndex];
 
-      const extraTurns = 2 + Math.floor(Math.random() * 4);
-      const fullRotationDegrees = extraTurns * 360;
+        const targetSliceAngle = targetIndex * multSliceAngle;
+        const desiredFinal = (360 - targetSliceAngle) % 360;
 
-      let delta = (desiredFinal - (multRotation % 360) + 360) % 360;
-      const newRotation = multRotation + fullRotationDegrees + delta;
+        const extraTurns = 2 + Math.floor(Math.random() * 4);
+        const fullRotationDegrees = extraTurns * 360;
 
-      multWheel.style.transition =
-        `transform ${ANIMATION_DURATION_MS / 1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
-      multWheel.style.transform = `rotate(${newRotation}deg)`;
+        let delta = (desiredFinal - (multRotation % 360) + 360) % 360;
+        const newRotation = multRotation + fullRotationDegrees + delta;
 
-      const onEnd = () => {
-        multRotation = newRotation;
+        multWheel.style.transition =
+          `transform ${ANIMATION_DURATION_MS / 1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
+        multWheel.style.transform = `rotate(${newRotation}deg)`;
 
-        playSoundSafe(winOinks);
+        const onEnd = () => {
+          multRotation = newRotation;
 
-        const raw = baseAmount * multiplier;
-        const payout = Math.round(raw / 5) * 5; 
+          playSoundSafe(winOinks);
 
-        // Calculate and add only the net gain 
-        const netGain = payout - baseAmount;
-        if (netGain > 0) {
-            total += netGain;
-        }
+          const raw = baseAmount * multiplier;
+          const payout = Math.round(raw / 5) * 5; 
 
-        totalEl.textContent = total;
-        lastResultEl.textContent = payout; 
+          // Calculate and add only the net gain 
+          const netGain = payout - baseAmount;
+          if (netGain > 0) {
+              total += netGain;
+          }
 
-        const li = document.createElement("li");
-        li.textContent =
-          `Multiplier spin: x${multiplier} on $${baseAmount} → Total Payout $${payout}`;
-        historyEl.prepend(li);
-        historyEl.firstElementChild.style.fontWeight = 'bold'; 
+          totalEl.textContent = total;
+          lastResultEl.textContent = payout; 
 
-        // CHECK FOR $100 INCREMENT
-        checkAndShowVideo(previousTotal);
+          const li = document.createElement("li");
+          li.textContent =
+            `Multiplier spin: x${multiplier} on $${baseAmount} → Total Payout $${payout}`;
+          historyEl.prepend(li);
+          historyEl.firstElementChild.style.fontWeight = 'bold'; 
 
-        showRandomCaption(); // Use the new function for random text
-        checkUnlockMultiplier();
+          checkAndShowVideo(previousTotal);
+          showRandomCaption(); 
 
-        isSpinning = false;
-        spinBtn.disabled = false;
-      };
+          isSpinning = false;
+          spinBtn.disabled = false;
+        };
 
-      setTimeout(onEnd, ANIMATION_DURATION_MS);
+        // Use reliable setTimeout based on duration
+        setTimeout(onEnd, ANIMATION_DURATION_MS);
+
+      }, 50); // Small 50ms delay
     }
 
     /* ---------- MAIN CASH WHEEL SPIN ---------- */
@@ -712,7 +715,7 @@
       sendNowOverlay.style.display = "none";
       hideBigWinVideo(); 
       
-      const previousTotal = total; // Store total before adding new prize
+      const previousTotal = total; 
 
       playSoundSafe(spinOink);
 
@@ -749,18 +752,16 @@
         li.textContent = `Base spin ${spinCount}: $${targetPrize}`;
         historyEl.prepend(li);
         
-        // CHECK FOR $100 INCREMENT
         checkAndShowVideo(previousTotal);
-
-
-        showRandomCaption(); // Use the new function for random text
+        showRandomCaption(); 
         checkUnlockMultiplier();
 
         // Check if the multiplier is UNLOCKED AND we need to spin it automatically
         if (total >= 150) {
+          // If unlocked, call spinMultiplierAuto. isSpinning remains true until it finishes.
           spinMultiplierAuto(targetPrize);
         } else {
-          // The sequence is fully done, re-enable the main spin button and flags
+          // If not unlocked, re-enable buttons immediately.
           isSpinning = false;
           spinBtn.disabled = false;
         }
@@ -797,7 +798,6 @@
 
     /* ---------- EVENTS ---------- */
     spinBtn.addEventListener("click", spinBaseWheel);
-    // Manual multiplier button still wired but hidden
     const multSpinBtnElement = document.getElementById("multSpinBtn");
     if (multSpinBtnElement) {
         multSpinBtnElement.addEventListener("click", () => {
