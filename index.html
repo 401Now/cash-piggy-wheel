@@ -440,7 +440,7 @@
     const ANIMATION_DURATION_MS = 8000;
     const TRIGGER_AMOUNT = 100; // Constant for the video trigger amount
     
-    // NEW: Array of random captions
+    // UPDATED: Array of random captions including the new phrases
     const randomCaptions = [
       "WHO IS A GOOD PIG?",
       "THERE YOU GO",
@@ -449,7 +449,10 @@
       "YOU KNOW I LOVE DRAINING YOU",
       "THE MORE YOU SPIN THE MORE I'LL STRETCH YOU",
       "KEEP SPINNING PIGGY",
-      "OINK OINK CASH PIG"
+      "OINK OINK CASH PIG",
+      "HIT THOSE POPPERS PIGGY",
+      "IM GOING TO TURN YOU INTO MY TOILET",
+      "THINK ABOUT THAT GOLDEN LIQUID RUNNING DOWN YOUR THROAT"
     ];
 
 
@@ -484,7 +487,6 @@
 
     const multWrapper = document.getElementById("multWrapper");
     const multWheel = document.getElementById("multWheel");
-    // const multSpinBtn = document.getElementById("multSpinBtn"); // Not used as spin is automatic
 
     const totalEl = document.getElementById("total");
     const lastResultEl = document.getElementById("lastResult");
@@ -505,13 +507,13 @@
     /* ---------- STATE ---------- */
     let baseRotation = 0;
     let multRotation = 0;
-    let isSpinning = false;      // single flag for both wheels
+    let isSpinning = false;      
     let total = 0;
     let spinCount = 0;
     let audioPrimed = false;
     let sendNowTimeoutId = null;
 
-    /* ---------- INITIALIZATION (Added to correctly set initial state from DOM) ---------- */
+    /* ---------- INITIALIZATION ---------- */
     function initializeState() {
         total = parseInt(totalEl.textContent) || 0;
         spinCount = parseInt(spinCountEl.textContent) || 0;
@@ -519,7 +521,7 @@
             multWrapper.classList.add("unlocked");
         }
     }
-    // initializeState(); // We are starting from 0, so initialization on load is not strictly necessary but included for completeness.
+    // initializeState(); 
 
     /* ---------- LABEL GENERATION ---------- */
 
