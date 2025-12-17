@@ -103,7 +103,7 @@
       display: none; 
     }
 
-    /* "Send Now Piggy" overlay */
+    /* "Send Now Piggy" overlay - now generic message overlay */
     .send-now-overlay {
       position: absolute;
       top: 80%;
@@ -417,9 +417,9 @@
       <h2>Cash Piggy 🐷</h2>
 
       <div class="stats-row">
-        <div>Total: <strong>$<span id="total">0</span></strong></div>
-        <div>Spins: <strong><span id="spinCount">0</span></strong></div>
-        <div>Last: <strong>$<span id="lastResult">–</span></strong></div>
+        <div>Total: <strong>$<span id="total">220</span></strong></div>
+        <div>Spins: <strong><span id="spinCount">7</span></strong></div>
+        <div>Last: <strong>$<span id="lastResult">55</span></strong></div>
       </div>
 
       <div class="history-title">Spin history</div>
@@ -432,7 +432,7 @@
   <script>
     /*
       =======================================================
-      JAVASCRIPT LOGIC (FIXED SPIN + VIDEO TRIGGER AT $100 MULTIPLES)
+      JAVASCRIPT LOGIC (FIXED SPIN + VIDEO TRIGGER AT $100 MULTIPLES + RANDOM CAPTIONS)
       =======================================================
     */
 
@@ -440,6 +440,19 @@
 
     const ANIMATION_DURATION_MS = 8000;
     const TRIGGER_AMOUNT = 100; // Constant for the video trigger amount
+    
+    // NEW: Array of random captions
+    const randomCaptions = [
+      "WHO IS A GOOD PIG?",
+      "THERE YOU GO",
+      "YOU KNOW YOU LOVE IT",
+      "WHO'D MY FAVORITE PIGGY",
+      "YOU KNOW I LOVE DRAINING YOU",
+      "THE MORE YOU SPIN THE MORE I'LL STRETCH YOU",
+      "KEEP SPINNING PIGGY",
+      "OINK OINK CASH PIG"
+    ];
+
 
     // Wheel 1: 5–50 in increments of 5 (randomized order)
     const basePrizes = [5,10,15,20,25,30,35,40,45,50];
@@ -498,6 +511,16 @@
     let spinCount = 0;
     let audioPrimed = false;
     let sendNowTimeoutId = null;
+
+    /* ---------- INITIALIZATION (Added to correctly set initial state from DOM) ---------- */
+    function initializeState() {
+        total = parseInt(totalEl.textContent) || 0;
+        spinCount = parseInt(spinCountEl.textContent) || 0;
+        if (total >= 150) {
+            multWrapper.classList.add("unlocked");
+        }
+    }
+    initializeState();
 
     /* ---------- LABEL GENERATION ---------- */
 
@@ -572,17 +595,22 @@
         }, 200);
       });
     }
-
-    function showSendNowPrompt() {
+    
+    // UPDATED: Selects a random caption and displays it
+    function showRandomCaption() {
       if (sendNowTimeoutId !== null) {
         clearTimeout(sendNowTimeoutId);
       }
+      
+      const randomIndex = Math.floor(Math.random() * randomCaptions.length);
+      sendNowOverlay.textContent = randomCaptions[randomIndex]; // Set the new text
       sendNowOverlay.style.display = "block";
+      
       sendNowTimeoutId = setTimeout(() => {
         sendNowOverlay.style.display = "none";
       }, 4000);
     }
-    
+
     // Function to check for $100 increment and show video (ONCE per spin)
     function checkAndShowVideo(previousTotal) {
       const currentMultiple = Math.floor(total / TRIGGER_AMOUNT) * TRIGGER_AMOUNT;
@@ -661,7 +689,7 @@
         // CHECK FOR $100 INCREMENT
         checkAndShowVideo(previousTotal);
 
-        showSendNowPrompt();
+        showRandomCaption(); // Use the new function for random text
         checkUnlockMultiplier();
 
         isSpinning = false;
@@ -680,10 +708,9 @@
 
       isSpinning = true;
       spinBtn.disabled = true; 
-      // Big win overlay is no longer needed but we ensure its hidden
       bigWinOverlay.style.display = "none"; 
       sendNowOverlay.style.display = "none";
-      hideBigWinVideo(); // Ensure video is closed before starting new spin
+      hideBigWinVideo(); 
       
       const previousTotal = total; // Store total before adding new prize
 
@@ -726,7 +753,7 @@
         checkAndShowVideo(previousTotal);
 
 
-        showSendNowPrompt();
+        showRandomCaption(); // Use the new function for random text
         checkUnlockMultiplier();
 
         // Check if the multiplier is UNLOCKED AND we need to spin it automatically
