@@ -13,6 +13,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      overflow: hidden; /* ADDED: prevent page shifting due to overflow */
     }
 
     .app {
@@ -28,6 +29,7 @@
       align-items: flex-start;
       justify-content: center;
       gap: 16px;
+      flex-wrap: nowrap; /* ADDED: keeps wheel + sidebar from wrapping/pushing layout */
     }
 
     /* ---------- MAIN WHEEL (600px) ---------- */
@@ -38,6 +40,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0; /* ADDED: do not allow wheel to shrink */
     }
 
     .wheel {
@@ -173,6 +176,7 @@
       align-items: center;
       gap: 6px;
       margin-top: 8px;
+      flex-shrink: 0; /* ADDED: don't shrink multiplier either */
     }
 
     .mult-title {
@@ -269,13 +273,17 @@
 
     /* ---------- STATS / COUNTER ---------- */
     .sidebar {
-      width: 100%;
-      max-width: 520px;
+      width: 520px;              /* CHANGED: lock width so it never grows */
+      min-width: 520px;          /* ADDED */
+      max-width: 520px;          /* ADDED */
       background: #181818;
       border-radius: 12px;
       padding: 20px 22px;
       box-shadow: 0 0 18px rgba(0,0,0,0.7);
       text-align: center;
+      box-sizing: border-box;    /* ADDED */
+      overflow: hidden;          /* ADDED */
+      flex-shrink: 0;            /* ADDED: keep layout stable */
     }
 
     .sidebar h2 {
@@ -293,6 +301,14 @@
       font-size: 18px;
     }
 
+    /* ADDED: prevent long numbers from expanding layout */
+    .stats-row > div {
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .history-title {
       margin-top: 12px;
       font-size: 18px;
@@ -305,6 +321,8 @@
       padding-left: 0;
       max-height: 140px;
       overflow-y: auto;
+      overflow-x: hidden;        /* ADDED */
+      word-break: break-word;    /* ADDED */
       font-size: 15px;
       text-align: left;
       margin: 0;
