@@ -98,12 +98,6 @@
       z-index: 20;
     }
 
-    /* Big win overlay (Original text version - now hidden for video) */
-    .big-win-overlay {
-      display: none; 
-    }
-
-    /* "Send Now Piggy" overlay - now generic message overlay */
     .send-now-overlay {
       position: absolute;
       top: 80%;
@@ -121,12 +115,6 @@
       white-space: nowrap;
       z-index: 40;
       animation: send-flash 1s linear infinite;
-    }
-
-    @keyframes piggy-pop {
-      0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
-      50%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
 
     @keyframes send-flash {
@@ -152,217 +140,41 @@
       box-shadow: 0 0 12px rgba(0,0,0,0.8);
       z-index: 35;
     }
-    .spin-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    .spin-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* ---------- MULTIPLIER WHEEL (350px) ---------- */
-    .mult-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .mult-title {
-      font-size: 18px;
-      margin-bottom: 2px;
-    }
-
-    .mult-locked {
-      font-size: 14px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: rgba(0,0,0,0.7);
-      border: 1px solid #888;
-      color: #ddd;
-      white-space: nowrap;
-    }
-
-    .mult-inner {
-      position: relative;
-      width: 380px;
-      height: 380px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .mult-wrapper.unlocked .mult-inner {
-      display: flex;
-    }
-    .mult-wrapper.unlocked .mult-locked {
-      display: none;
-    }
-
+    /* ---------- MULTIPLIER WHEEL ---------- */
+    .mult-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 8px; }
+    .mult-title { font-size: 18px; margin-bottom: 2px; }
+    .mult-locked { font-size: 14px; padding: 6px 12px; border-radius: 999px; background: rgba(0,0,0,0.7); border: 1px solid #888; color: #ddd; white-space: nowrap; }
+    .mult-inner { position: relative; width: 380px; height: 380px; display: none; align-items: center; justify-content: center; }
+    .mult-wrapper.unlocked .mult-inner { display: flex; }
+    .mult-wrapper.unlocked .mult-locked { display: none; }
     .mult-wheel {
-      width: 350px;
-      height: 350px;
-      border-radius: 50%;
-      border: 8px solid #44ddaa;
-      box-shadow: 0 0 18px rgba(0,0,0,0.9);
-      position: relative;
-      transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1);
-      transform: rotate(0deg);
-      background: conic-gradient(
-        #146b3a 0deg 45deg,
-        #f8b229 45deg 90deg,
-        #146b3a 90deg 135deg,
-        #f8b229 135deg 180deg,
-        #146b3a 180deg 225deg,
-        #f8b229 225deg 270deg,
-        #146b3a 270deg 315deg,
-        #f8b229 315deg 360deg
-      );
+      width: 350px; height: 350px; border-radius: 50%; border: 8px solid #44ddaa; box-shadow: 0 0 18px rgba(0,0,0,0.9);
+      position: relative; transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1); transform: rotate(0deg);
+      background: conic-gradient(#146b3a 0deg 45deg, #f8b229 45deg 90deg, #146b3a 90deg 135deg, #f8b229 135deg 180deg, #146b3a 180deg 225deg, #f8b229 225deg 270deg, #146b3a 270deg 315deg, #f8b229 315deg 360deg);
     }
+    .mult-label { position: absolute; left: 50%; top: 50%; transform-origin: center center; color: #fff; font-size: 18px; font-weight: bold; text-shadow: 0 0 3px #000; width: 80px; text-align: center; line-height: 1.1; }
+    .mult-pointer { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-bottom: 30px solid #ffffff; filter: drop-shadow(0 0 4px #000); z-index: 20; }
 
-    .mult-label {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform-origin: center center;
-      color: #fff;
-      font-size: 18px;
-      font-weight: bold;
-      text-shadow: 0 0 3px #000;
-      width: 80px;
-      text-align: center;
-      line-height: 1.1;
-    }
-
-    .mult-pointer {
-      position: absolute;
-      top: -18px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 18px solid transparent;
-      border-right: 18px solid transparent;
-      border-bottom: 30px solid #ffffff;
-      filter: drop-shadow(0 0 4px #000);
-      z-index: 20;
-    }
-
-    .mult-spin-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 10px 24px;
-      font-size: 18px;
-      z-index: 25;
-      background: linear-gradient(135deg, #44ddaa, #11aa88);
-      display: none; /* hidden; multiplier is auto */
-    }
-
-    /* ---------- STATS / COUNTER ---------- */
-    .sidebar {
-      width: 100%;
-      max-width: 520px;
-      background: #181818;
-      border-radius: 12px;
-      padding: 20px 22px;
-      box-shadow: 0 0 18px rgba(0,0,0,0.7);
-      text-align: center;
-    }
-
-    .sidebar h2 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      font-size: 24px;
-      border-bottom: 1px solid #333;
-      padding-bottom: 8px;
-    }
-
-    .stats-row {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-
-    .history-title {
-      margin-top: 12px;
-      font-size: 18px;
-      border-bottom: 1px solid #333;
-      padding-bottom: 5px;
-    }
-
-    .history {
-      list-style: none;
-      padding-left: 0;
-      max-height: 140px;
-      overflow-y: auto;
-      font-size: 15px;
-      text-align: left;
-      margin: 0;
-    }
-
-    .history li {
-      padding: 3px 0;
-    }
-
-    .reset-btn {
-      margin-top: 12px;
-      padding: 8px 14px;
-      font-size: 15px;
-      border-radius: 4px;
-      border: 1px solid #444;
-      background: #222;
-      color: #eee;
-      cursor: pointer;
-    }
+    /* ---------- SIDEBAR / PAYMENTS ---------- */
+    .sidebar { width: 100%; max-width: 520px; background: #181818; border-radius: 12px; padding: 20px 22px; box-shadow: 0 0 18px rgba(0,0,0,0.7); text-align: center; }
+    .stats-row { display: flex; justify-content: space-around; margin-bottom: 15px; font-size: 18px; }
     
-    /* ---------- VIDEO MODAL STYLES ---------- */
-    .video-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.95);
-      display: none; 
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-    }
+    .pay-section { display: none; margin: 15px 0; flex-direction: column; gap: 10px; align-items: center; }
+    .pay-btn { display: flex; align-items: center; justify-content: center; width: 80%; padding: 12px; border-radius: 30px; text-decoration: none; font-weight: bold; color: white; font-size: 14px; }
+    .v-btn { background: #008CFF; }
+    .c-btn { background: #2775ca; border: 1px solid #4a90e2; }
+    .copy-addr { font-size: 10px; color: #555; cursor: pointer; text-decoration: underline; margin-top: 4px; }
 
-    .video-container {
-      position: relative;
-      width: 90%;
-      max-width: 800px; 
-      background: #111;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 30px rgba(0, 255, 102, 0.8);
-      border: 5px solid #00ff66;
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 5px;
-      right: 15px;
-      color: #00ff66;
-      font-size: 40px;
-      font-weight: bold;
-      cursor: pointer;
-      line-height: 1;
-      opacity: 0.8;
-      transition: opacity 0.2s;
-    }
-
-    .close-btn:hover {
-      opacity: 1;
-    }
-
-    #piggyVideo {
-      width: 100%;
-      max-height: 80vh; 
-    }
-
+    .history { list-style: none; padding-left: 0; max-height: 140px; overflow-y: auto; font-size: 13px; text-align: left; margin: 0; border-top: 1px solid #333; padding-top: 10px; }
+    .reset-btn { margin-top: 12px; padding: 8px 14px; font-size: 12px; border-radius: 4px; border: 1px solid #444; background: #222; color: #eee; cursor: pointer; }
+    
+    /* ---------- VIDEO MODAL ---------- */
+    .video-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: none; justify-content: center; align-items: center; z-index: 100; }
+    .video-container { position: relative; width: 90%; max-width: 800px; background: #111; padding: 20px; border-radius: 10px; box-shadow: 0 0 30px rgba(0, 255, 102, 0.8); border: 5px solid #00ff66; }
+    .close-btn { position: absolute; top: 5px; right: 15px; color: #00ff66; font-size: 40px; font-weight: bold; cursor: pointer; }
+    #piggyVideo { width: 100%; max-height: 80vh; }
   </style>
 </head>
 <body>
@@ -372,7 +184,6 @@
         <span class="close-btn" id="closeVideoBtn">&times;</span>
         <video id="piggyVideo" controls preload="auto">
           <source src="piggy-video.mp4" type="video/mp4">
-          Your browser does not support the video tag.
         </video>
       </div>
     </div>
@@ -381,16 +192,8 @@
       <div class="wheel-wrapper">
         <div class="pointer"></div>
         <div id="wheel" class="wheel"></div>
-
-        <div id="bigWinOverlay" class="big-win-overlay">
-          🐷💰 CASH PIGGY BIG WIN! 💰🐷
-        </div>
-
-        <div id="sendNowOverlay" class="send-now-overlay">
-          </div>
-
+        <div id="sendNowOverlay" class="send-now-overlay"></div>
         <button id="spinBtn" class="spin-btn">Spin</button>
-
         <audio id="spinOink" src="pig-spin.mp3" preload="auto"></audio>
         <audio id="winOinks" src="pig-win.mp3" preload="auto"></audio>
         <audio id="bigWinSound" src="cash-win.mp3" preload="auto"></audio>
@@ -398,421 +201,142 @@
 
       <div id="multWrapper" class="mult-wrapper">
         <div class="mult-title">Multiplier Wheel</div>
-        <div id="multLocked" class="mult-locked">
-          🔒 Locked – reach $150 total to unlock
-        </div>
-
+        <div id="multLocked" class="mult-locked">🔒 reach $150 to unlock</div>
         <div class="mult-inner">
           <div class="mult-pointer"></div>
           <div id="multWheel" class="mult-wheel"></div>
-          <button id="multSpinBtn" class="spin-btn mult-spin-btn">
-            Spin Multiplier
-          </button>
         </div>
       </div>
     </div>
 
     <div class="sidebar">
-      <h2>Cash Piggy 🐷</h2>
-
       <div class="stats-row">
-        <div>Total: <strong>$<span id="total">0</span></strong></div>
+        <div>Total Debt: <strong>$<span id="total">0</span></strong></div>
         <div>Spins: <strong><span id="spinCount">0</span></strong></div>
-        <div>Last: <strong>$<span id="lastResult">–</span></strong></div>
       </div>
 
-      <div class="history-title">Spin history</div>
-      <ul id="history" class="history"></ul>
+      <div id="pay-section" class="pay-section">
+        <a id="venmo-link" class="pay-btn v-btn" href="#">SETTLE VIA VENMO</a>
+        <a id="crypto-link" class="pay-btn c-btn" href="#">SETTLE VIA CRYPTO</a>
+        <div class="copy-addr" onclick="copyAddress()">Copy USDC Base Address</div>
+      </div>
 
+      <ul id="history" class="history"></ul>
       <button id="resetBtn" class="reset-btn">Reset session</button>
     </div>
   </div>
 
   <script>
-    /*
-      =======================================================
-      JAVASCRIPT LOGIC (FIXED SPIN + VIDEO TRIGGER AT $100 MULTIPLES + RANDOM CAPTIONS)
-      =======================================================
-    */
-
-    /* ---------- DATA ---------- */
-
+    /* ---------- CONFIGURATION ---------- */
+    const venmoUser = "outcastjaxton";
+    const usdcAddress = "0x7a890107E81851d17D8899E6784386d57EdcF141";
+    const TRIGGER_AMOUNT = 100;
     const ANIMATION_DURATION_MS = 8000;
-    const TRIGGER_AMOUNT = 100; // Constant for the video trigger amount
-    
-    // UPDATED: Array of random captions including the new phrases
+
     const randomCaptions = [
-      "WHO IS A GOOD PIG?",
-      "THERE YOU GO",
-      "YOU KNOW YOU LOVE IT",
-      "WHO'D MY FAVORITE PIGGY",
-      "YOU KNOW I LOVE DRAINING YOU",
-      "THE MORE YOU SPIN THE MORE I'LL STRETCH YOU",
-      "KEEP SPINNING PIGGY",
-      "OINK OINK CASH PIG",
-      "HIT THOSE POPPERS PIGGY",
-      "IM GOING TO TURN YOU INTO MY TOILET",
-      "THINK ABOUT THAT GOLDEN LIQUID RUNNING DOWN YOUR THROAT"
+      "WHO IS A GOOD PIG?", "THERE YOU GO", "YOU KNOW YOU LOVE IT", "YOU KNOW I LOVE DRAINING YOU",
+      "THE MORE YOU SPIN THE MORE I'LL STRETCH YOU", "KEEP SPINNING PIGGY", "OINK OINK CASH PIG",
+      "IM GOING TO TURN YOU INTO MY TOILET", "THINK ABOUT THAT GOLDEN LIQUID RUNNING DOWN YOUR THROAT"
     ];
 
+    const prizes = [5,10,15,20,25,30,35,40,45,50].sort(() => Math.random() - 0.5);
+    const multipliers = [1.25,1.5,1.75,2,2.25,2.5,2.75,3].sort(() => Math.random() - 0.5);
 
-    // Wheel 1: 5–50 in increments of 5 (randomized order)
-    const basePrizes = [5,10,15,20,25,30,35,40,45,50];
-    const baseSliceCount = basePrizes.length;
-    const baseSliceAngle = 360 / baseSliceCount;
-
-    // Multiplier wheel: unlocks at total >= 150
-    const baseMultipliers = [1.25,1.5,1.75,2,2.25,2.5,2.75,3];
-    const multSliceCount = baseMultipliers.length;
-    const multSliceAngle = 360 / multSliceCount;
-
-    function shuffleArray(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    const prizes = shuffleArray(basePrizes);
-    const multipliers = shuffleArray(baseMultipliers);
-
-    /* ---------- DOM ELEMENTS ---------- */
+    /* ---------- DOM ---------- */
     const wheel = document.getElementById("wheel");
-    const spinBtn = document.getElementById("spinBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const bigWinOverlay = document.getElementById("bigWinOverlay");
-    const sendNowOverlay = document.getElementById("sendNowOverlay");
-
-    const multWrapper = document.getElementById("multWrapper");
     const multWheel = document.getElementById("multWheel");
-
+    const spinBtn = document.getElementById("spinBtn");
     const totalEl = document.getElementById("total");
-    const lastResultEl = document.getElementById("lastResult");
-    const spinCountEl = document.getElementById("spinCount");
     const historyEl = document.getElementById("history");
+    const paySection = document.getElementById("pay-section");
 
-    // Audio elements
-    const spinOink = document.getElementById("spinOink");
-    const winOinks = document.getElementById("winOinks");
-    const bigWinSound = document.getElementById("bigWinSound");
+    let baseRotation = 0, multRotation = 0, total = 0, spinCount = 0, isSpinning = false;
 
-    // Video modal elements
-    const videoModal = document.getElementById("videoModal");
-    const piggyVideo = document.getElementById("piggyVideo");
-    const closeVideoBtn = document.getElementById("closeVideoBtn");
-
-
-    /* ---------- STATE ---------- */
-    let baseRotation = 0;
-    let multRotation = 0;
-    let isSpinning = false;      
-    let total = 0;
-    let spinCount = 0;
-    let audioPrimed = false;
-    let sendNowTimeoutId = null;
-
-    /* ---------- INITIALIZATION ---------- */
-    function initializeState() {
-        total = parseInt(totalEl.textContent) || 0;
-        spinCount = parseInt(spinCountEl.textContent) || 0;
-        if (total >= 150) {
-            multWrapper.classList.add("unlocked");
-        }
-    }
-    // initializeState(); 
-
-    /* ---------- LABEL GENERATION ---------- */
-
-    function createBaseLabels() {
-      const radius = 260; 
-      prizes.forEach((value, index) => {
+    /* ---------- INITIALIZE LABELS ---------- */
+    function createLabels(target, data, radius, prefix) {
+      const angleStep = 360 / data.length;
+      data.forEach((val, i) => {
         const label = document.createElement("div");
-        label.className = "wheel-label";
-        label.textContent = "$" + value;
-
-        const angleDeg = index * baseSliceAngle;
-        const angleRad = (angleDeg - 90) * Math.PI / 180;
-        const x = radius * Math.cos(angleRad);
-        const y = radius * Math.sin(angleRad);
-
-        label.style.transform =
-          `translate(-50%, -50%) translate(${x}px, ${y}px)`;
-        wheel.appendChild(label);
+        label.className = target.id === "wheel" ? "wheel-label" : "mult-label";
+        label.textContent = prefix + val;
+        const rad = (i * angleStep - 90) * Math.PI / 180;
+        label.style.transform = `translate(-50%, -50%) translate(${radius * Math.cos(rad)}px, ${radius * Math.sin(rad)}px)`;
+        target.appendChild(label);
       });
     }
+    createLabels(wheel, prizes, 260, "$");
+    createLabels(multWheel, multipliers, 135, "x");
 
-    function createMultLabels() {
-      const radius = 135; 
-      multipliers.forEach((value, index) => {
-        const label = document.createElement("div");
-        label.className = "mult-label";
-        label.textContent = "x" + value.toString();
-
-        const angleDeg = index * multSliceAngle;
-        const angleRad = (angleDeg - 90) * Math.PI / 180;
-        const x = radius * Math.cos(angleRad);
-        const y = radius * Math.sin(angleRad);
-
-        label.style.transform =
-          `translate(-50%, -50%) translate(${x}px, ${y}px)`;
-        multWheel.appendChild(label);
-      });
-    }
-
-    createBaseLabels();
-    createMultLabels();
-
-    /* ---------- UTIL FUNCTIONS ---------- */
-
-    function pickRandomIndex(len) {
-      return Math.floor(Math.random() * len);
-    }
-
-    function playSoundSafe(audioEl) {
-      if (!audioEl) return;
-      try {
-        audioEl.currentTime = 0;
-        audioEl.play().catch(() => {});
-      } catch (e) {}
-    }
-
-    function primeAudioIfNeeded() {
-      if (audioPrimed) return;
-      audioPrimed = true;
-      const audios = [spinOink, winOinks, bigWinSound];
-      audios.forEach(a => {
-        if (!a) return;
-        const originalVolume = a.volume;
-        a.volume = 0;
-        a.play().catch(() => {});
-        setTimeout(() => {
-          try {
-            a.pause();
-            a.currentTime = 0;
-          } catch (e) {}
-          a.volume = originalVolume;
-        }, 200);
-      });
-    }
-    
-    function showRandomCaption() {
-      if (sendNowTimeoutId !== null) {
-        clearTimeout(sendNowTimeoutId);
-      }
-      
-      const randomIndex = Math.floor(Math.random() * randomCaptions.length);
-      sendNowOverlay.textContent = randomCaptions[randomIndex]; 
-      sendNowOverlay.style.display = "block";
-      
-      sendNowTimeoutId = setTimeout(() => {
-        sendNowOverlay.style.display = "none";
-      }, 4000);
-    }
-
-    function checkAndShowVideo(previousTotal) {
-      const currentMultiple = Math.floor(total / TRIGGER_AMOUNT) * TRIGGER_AMOUNT;
-      const previousMultiple = Math.floor(previousTotal / TRIGGER_AMOUNT) * TRIGGER_AMOUNT;
-
-      if (currentMultiple > 0 && currentMultiple > previousMultiple) {
-        showBigWinVideo();
+    /* ---------- CORE LOGIC ---------- */
+    function updatePayments() {
+      if (total > 0) {
+        paySection.style.display = "flex";
+        const note = encodeURIComponent("small business support");
+        document.getElementById('venmo-link').href = `venmo://paycharge?txn=pay&recipients=${venmoUser}&amount=${total}&note=${note}`;
+        document.getElementById('crypto-link').href = `ethereum:${usdcAddress}@8453/transfer?address=${usdcAddress}&uint256=${total}e6`;
+        document.getElementById('crypto-link').innerHTML = `PAY ${total} USDC (BASE)`;
       }
     }
-
-    function showBigWinVideo() {
-      videoModal.style.display = "flex";
-      piggyVideo.play();
-      playSoundSafe(bigWinSound); 
-    }
-
-    function hideBigWinVideo() {
-        videoModal.style.display = "none";
-        piggyVideo.pause();
-        piggyVideo.currentTime = 0;
-    }
-
-    function checkUnlockMultiplier() {
-      if (total >= 150) {
-        multWrapper.classList.add("unlocked");
-      }
-    }
-
-    /* ---------- MULTIPLIER WHEEL SPIN (AUTOMATIC) ---------- */
-
-    function spinMultiplierAuto(baseAmount) {
-      const previousTotal = total; 
-
-      // 1. Ensure the multiplier is visually unlocked before trying to spin
-      checkUnlockMultiplier();
-
-      // Fix: Add a short delay to ensure the browser registers the visual change (display:flex)
-      // before attempting to apply the animation transform.
-      setTimeout(() => { 
-        
-        playSoundSafe(spinOink);
-
-        const targetIndex = pickRandomIndex(multipliers.length);
-        const multiplier = multipliers[targetIndex];
-
-        const targetSliceAngle = targetIndex * multSliceAngle;
-        const desiredFinal = (360 - targetSliceAngle) % 360;
-
-        const extraTurns = 2 + Math.floor(Math.random() * 4);
-        const fullRotationDegrees = extraTurns * 360;
-
-        let delta = (desiredFinal - (multRotation % 360) + 360) % 360;
-        const newRotation = multRotation + fullRotationDegrees + delta;
-
-        multWheel.style.transition =
-          `transform ${ANIMATION_DURATION_MS / 1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
-        multWheel.style.transform = `rotate(${newRotation}deg)`;
-
-        const onEnd = () => {
-          multRotation = newRotation;
-
-          playSoundSafe(winOinks);
-
-          const raw = baseAmount * multiplier;
-          const payout = Math.round(raw / 5) * 5; 
-
-          // Calculate and add only the net gain 
-          const netGain = payout - baseAmount;
-          if (netGain > 0) {
-              total += netGain;
-          }
-
-          totalEl.textContent = total;
-          lastResultEl.textContent = payout; 
-
-          const li = document.createElement("li");
-          li.textContent =
-            `Multiplier spin: x${multiplier} on $${baseAmount} → Total Payout $${payout}`;
-          historyEl.prepend(li);
-          historyEl.firstElementChild.style.fontWeight = 'bold'; 
-
-          checkAndShowVideo(previousTotal);
-          showRandomCaption(); 
-
-          isSpinning = false;
-          spinBtn.disabled = false;
-        };
-
-        // Use reliable setTimeout based on duration
-        setTimeout(onEnd, ANIMATION_DURATION_MS);
-
-      }, 50); // Small 50ms delay
-    }
-
-    /* ---------- MAIN CASH WHEEL SPIN ---------- */
 
     function spinBaseWheel() {
-      if (isSpinning) return;   
+      if (isSpinning) return;
+      isSpinning = true; spinBtn.disabled = true;
+      const prevTotal = total;
+      const targetIdx = Math.floor(Math.random() * prizes.length);
+      const targetPrize = prizes[targetIdx];
+      const delta = ( (360 - (targetIdx * (360/prizes.length))) % 360 - (baseRotation % 360) + 360) % 360;
+      baseRotation += (1440 + delta);
+      wheel.style.transition = `transform ${ANIMATION_DURATION_MS/1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
+      wheel.style.transform = `rotate(${baseRotation}deg)`;
 
-      primeAudioIfNeeded();
-
-      isSpinning = true;
-      spinBtn.disabled = true; 
-      bigWinOverlay.style.display = "none"; 
-      sendNowOverlay.style.display = "none";
-      hideBigWinVideo(); 
-      
-      const previousTotal = total; 
-
-      playSoundSafe(spinOink);
-
-      const targetIndex = pickRandomIndex(prizes.length);
-      const targetPrize = prizes[targetIndex];
-
-      const targetSliceAngle = targetIndex * baseSliceAngle;
-      const desiredFinal = (360 - targetSliceAngle) % 360;
-
-      const extraTurns = 2 + Math.floor(Math.random() * 4);
-      const fullRotationDegrees = extraTurns * 360;
-
-      let delta = (desiredFinal - (baseRotation % 360) + 360) % 360;
-      const newRotation = baseRotation + fullRotationDegrees + delta;
-
-      wheel.style.transition =
-        `transform ${ANIMATION_DURATION_MS / 1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
-      wheel.style.transform = `rotate(${newRotation}deg)`;
-
-      const onEnd = () => {
-        baseRotation = newRotation;
-
-        playSoundSafe(winOinks);
-
-        // --- Stats Update (Base Spin) ---
-        total += targetPrize;
-        spinCount++;
-
+      setTimeout(() => {
+        total += targetPrize; spinCount++;
         totalEl.textContent = total;
-        lastResultEl.textContent = targetPrize;
-        spinCountEl.textContent = spinCount;
-
-        const li = document.createElement("li");
-        li.textContent = `Base spin ${spinCount}: $${targetPrize}`;
-        historyEl.prepend(li);
-        
-        checkAndShowVideo(previousTotal);
-        showRandomCaption(); 
-        checkUnlockMultiplier();
-
-        // Check if the multiplier is UNLOCKED AND we need to spin it automatically
-        if (total >= 150) {
-          // If unlocked, call spinMultiplierAuto. isSpinning remains true until it finishes.
-          spinMultiplierAuto(targetPrize);
-        } else {
-          // If not unlocked, re-enable buttons immediately.
-          isSpinning = false;
-          spinBtn.disabled = false;
-        }
-      };
-
-      setTimeout(onEnd, ANIMATION_DURATION_MS);
+        addHistory(`Base spin: $${targetPrize}`);
+        if (total >= 150) spinMultiplier(targetPrize, prevTotal);
+        else finishSpin(prevTotal);
+      }, ANIMATION_DURATION_MS);
     }
 
-    /* ---------- RESET ---------- */
+    function spinMultiplier(baseAmt, prevTotal) {
+      document.getElementById("multWrapper").classList.add("unlocked");
+      const targetIdx = Math.floor(Math.random() * multipliers.length);
+      const mult = multipliers[targetIdx];
+      const delta = ( (360 - (targetIdx * (360/multipliers.length))) % 360 - (multRotation % 360) + 360) % 360;
+      multRotation += (1080 + delta);
+      multWheel.style.transition = `transform ${ANIMATION_DURATION_MS/1000}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
+      multWheel.style.transform = `rotate(${multRotation}deg)`;
 
-    function resetSession() {
-      if (spinCount > 0) {
-        const summary =
-          `Cash Piggy Session Summary\n\n` +
-          `Spins: ${spinCount}\n` +
-          `Total: $${total}\n\n` +
-          `Last spin: ${lastResultEl.textContent === "–" ? "N/A" : "$" + lastResultEl.textContent}`;
-        alert(summary);
+      setTimeout(() => {
+        const payout = Math.round((baseAmt * mult) / 5) * 5;
+        total += (payout - baseAmt);
+        totalEl.textContent = total;
+        addHistory(`Multiplier x${mult}: Total Payout $${payout}`);
+        finishSpin(prevTotal);
+      }, ANIMATION_DURATION_MS);
+    }
+
+    function finishSpin(prevTotal) {
+      isSpinning = false; spinBtn.disabled = false;
+      updatePayments();
+      if (Math.floor(total/TRIGGER_AMOUNT) > Math.floor(prevTotal/TRIGGER_AMOUNT)) {
+        document.getElementById("videoModal").style.display = "flex";
+        document.getElementById("piggyVideo").play();
       }
-
-      total = 0;
-      spinCount = 0;
-      totalEl.textContent = "0";
-      spinCountEl.textContent = "0";
-      lastResultEl.textContent = "–";
-      historyEl.innerHTML = "";
-      bigWinOverlay.style.display = "none";
-      sendNowOverlay.style.display = "none";
-      multWrapper.classList.remove("unlocked");
-      isSpinning = false;
-      spinBtn.disabled = false;
-      hideBigWinVideo();
     }
 
-    /* ---------- EVENTS ---------- */
+    function addHistory(txt) {
+      const li = document.createElement("li"); li.textContent = txt;
+      historyEl.prepend(li);
+    }
+
+    function copyAddress() {
+      navigator.clipboard.writeText(usdcAddress); alert("Address Copied!");
+    }
+
     spinBtn.addEventListener("click", spinBaseWheel);
-    const multSpinBtnElement = document.getElementById("multSpinBtn");
-    if (multSpinBtnElement) {
-        multSpinBtnElement.addEventListener("click", () => {
-            alert("Multiplier spins automatically after unlock.");
-        });
-    }
-    resetBtn.addEventListener("click", resetSession);
-    
-    // Close button for video modal
-    closeVideoBtn.addEventListener("click", hideBigWinVideo);
-    
-    // Close modal if video finishes playing
-    piggyVideo.addEventListener('ended', hideBigWinVideo);
+    document.getElementById("closeVideoBtn").addEventListener("click", () => document.getElementById("videoModal").style.display="none");
+    document.getElementById("resetBtn").addEventListener("click", () => location.reload());
   </script>
 </body>
 </html>
