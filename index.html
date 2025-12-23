@@ -13,7 +13,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
+      overflow: hidden; /* keep layout stable */
     }
 
     .app {
@@ -29,7 +29,7 @@
       align-items: flex-start;
       justify-content: center;
       gap: 16px;
-      flex-wrap: nowrap;
+      flex-wrap: nowrap; /* prevents wrapping shifts */
     }
 
     /* ---------- MAIN WHEEL (600px) ---------- */
@@ -40,7 +40,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
+      flex-shrink: 0; /* keep wheel from shrinking */
     }
 
     .wheel {
@@ -79,6 +79,8 @@
       width: 80px;
       text-align: center;
       line-height: 1.1;
+      pointer-events: none;
+      user-select: none;
     }
 
     .pointer {
@@ -113,6 +115,8 @@
       white-space: nowrap;
       z-index: 40;
       animation: piggy-pop 0.6s ease-out forwards;
+      pointer-events: none;
+      user-select: none;
     }
 
     /* "Send Now Piggy" overlay */
@@ -133,6 +137,8 @@
       white-space: nowrap;
       z-index: 40;
       animation: send-flash 1s linear infinite;
+      pointer-events: none;
+      user-select: none;
     }
 
     @keyframes piggy-pop {
@@ -192,6 +198,7 @@
       border: 1px solid #888;
       color: #ddd;
       white-space: nowrap;
+      user-select: none;
     }
 
     .mult-inner {
@@ -243,6 +250,8 @@
       width: 80px;
       text-align: center;
       line-height: 1.1;
+      pointer-events: none;
+      user-select: none;
     }
 
     .mult-pointer {
@@ -284,7 +293,9 @@
       box-sizing: border-box;
       overflow: hidden;
       flex-shrink: 0;
-      height: 300px; /* keep layout stable so wheel doesn't shift */
+
+      /* key to stop wheel shifting: fixed height */
+      height: 330px;
     }
 
     .sidebar h2 {
@@ -316,6 +327,7 @@
       padding-bottom: 5px;
     }
 
+    /* Only show last + previous spin, fixed size */
     .history-box {
       margin-top: 10px;
       text-align: left;
@@ -387,7 +399,9 @@
 </head>
 <body>
   <div class="app">
+    <!-- MAIN + MULTIPLIER WHEELS IN A ROW -->
     <div class="wheels-row">
+      <!-- MAIN CASH WHEEL -->
       <div class="wheel-wrapper">
         <div class="pointer"></div>
         <div id="wheel" class="wheel"></div>
@@ -402,11 +416,13 @@
 
         <button id="spinBtn" class="spin-btn">Spin</button>
 
+        <!-- Audio -->
         <audio id="spinOink" src="pig-spin.mp3" preload="auto"></audio>
         <audio id="winOinks" src="pig-win.mp3" preload="auto"></audio>
         <audio id="bigWinSound" src="cash-win.mp3" preload="auto"></audio>
       </div>
 
+      <!-- MULTIPLIER WHEEL (LOCKED UNTIL TOTAL >= 150) -->
       <div id="multWrapper" class="mult-wrapper">
         <div class="mult-title">Multiplier Wheel</div>
         <div id="multLocked" class="mult-locked">
@@ -423,6 +439,7 @@
       </div>
     </div>
 
+    <!-- STATS / COUNTER -->
     <div class="sidebar">
       <h2>Cash Piggy 🐷</h2>
 
@@ -433,7 +450,6 @@
       </div>
 
       <div class="history-title">Recent spins</div>
-
       <div class="history-box">
         <div class="history-line"><strong>Last:</strong> <span id="lastSpinLine">–</span></div>
         <div class="history-line"><strong>Prev:</strong> <span id="prevSpinLine">–</span></div>
@@ -441,6 +457,7 @@
 
       <button id="resetBtn" class="reset-btn">Reset session</button>
 
+      <!-- PAYMENT -->
       <div id="pay-section" class="pay-section">
         <a id="venmo-link" class="pay-btn v-btn" href="#" target="_blank" rel="noopener">
           SETTLE VIA VENMO
@@ -514,7 +531,7 @@
     let lastSpinText = "–";
     let prevSpinText = "–";
 
-    // NEW: safety timers so button never gets stuck disabled
+    // SAFETY TIMERS so button never gets stuck
     let baseEndTimer = null;
     let multEndTimer = null;
 
@@ -660,6 +677,7 @@
         baseRotation = newRotation;
 
         playSoundSafe(winOinks);
+
         if (targetPrize === 50) showBigWin();
 
         total += targetPrize;
@@ -683,14 +701,12 @@
       };
 
       const onEnd = (e) => {
-        // Only accept transitionend from transform on the wheel itself
         if (e.target !== wheel || e.propertyName !== "transform") return;
         finishBase();
       };
 
       wheel.addEventListener("transitionend", onEnd);
 
-      // NEW: fallback in case transitionend doesn't fire (Safari / iOS)
       baseEndTimer = safeClearTimer(baseEndTimer);
       baseEndTimer = setTimeout(finishBase, 8200);
     }
@@ -749,14 +765,12 @@
 
       multWheel.addEventListener("transitionend", onEnd);
 
-      // NEW: fallback in case transitionend doesn't fire
       multEndTimer = safeClearTimer(multEndTimer);
       multEndTimer = setTimeout(finishMult, 8200);
     }
 
     /* ---------- RESET ---------- */
     function resetSession() {
-      // clear any pending end timers to avoid weird state after reset
       baseEndTimer = safeClearTimer(baseEndTimer);
       multEndTimer = safeClearTimer(multEndTimer);
 
@@ -774,9 +788,12 @@
       totalEl.textContent = "0";
       spinCountEl.textContent = "0";
       lastResultEl.textContent = "–";
+
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
+
       multWrapper.classList.remove("unlocked");
+
       isSpinning = false;
       spinBtn.disabled = false;
 
@@ -788,9 +805,12 @@
 
     /* ---------- EVENTS ---------- */
     spinBtn.addEventListener("click", spinBaseWheel);
+
+    // Manual multiplier button still wired but hidden
     multSpinBtn.addEventListener("click", () => {
       alert("Multiplier spins automatically after unlock.");
     });
+
     resetBtn.addEventListener("click", resetSession);
   </script>
 </body>
