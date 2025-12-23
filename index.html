@@ -2,25 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Cash Piggy Wheel 🐷💰</title>
   <style>
+    :root{
+      /* Responsive sizes so everything fits */
+      --mainWheel: clamp(320px, min(70vw, 70vh), 600px);
+      --mainWrap:  calc(var(--mainWheel) + 40px);
+
+      --multWheel: clamp(220px, min(42vw, 42vh), 350px);
+      --multWrap:  calc(var(--multWheel) + 30px);
+
+      --sidebarW:  clamp(280px, 92vw, 520px);
+      --sidebarH:  clamp(280px, 38vh, 330px);
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: radial-gradient(circle at top, #ff99cc 0, #111 55%);
       color: #f5f5f5;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      overflow: hidden; /* keep layout stable */
+      overflow: hidden;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+               env(safe-area-inset-bottom) env(safe-area-inset-left);
+      box-sizing: border-box;
     }
 
     .app {
+      width: min(1200px, 100vw);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 14px;
+      padding: 10px;
+      box-sizing: border-box;
     }
 
     /* Row that holds main + multiplier wheels */
@@ -28,31 +47,31 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      gap: 16px;
-      flex-wrap: nowrap; /* prevents wrapping shifts */
+      gap: 14px;
+      flex-wrap: wrap; /* IMPORTANT: allows fit on small screens */
+      width: 100%;
     }
 
-    /* ---------- MAIN WHEEL (600px) ---------- */
+    /* ---------- MAIN WHEEL ---------- */
     .wheel-wrapper {
       position: relative;
-      width: 640px;
-      height: 640px;
+      width: var(--mainWrap);
+      height: var(--mainWrap);
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0; /* keep wheel from shrinking */
+      flex: 0 0 auto;
     }
 
     .wheel {
-      width: 600px;
-      height: 600px;
+      width: var(--mainWheel);
+      height: var(--mainWheel);
       border-radius: 50%;
-      border: 10px solid #ff66aa;
+      border: clamp(6px, 1.2vw, 10px) solid #ff66aa;
       box-shadow: 0 0 24px rgba(0,0,0,0.9);
       position: relative;
       transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1);
       transform: rotate(0deg);
-      /* 10 equal slices = 36deg each */
       background: conic-gradient(
         #c40000 0deg 36deg,
         #000000 36deg 72deg,
@@ -71,12 +90,11 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      transform-origin: center center;
       color: #fff;
-      font-size: 20px;
-      font-weight: bold;
+      font-size: clamp(12px, 2.2vw, 20px);
+      font-weight: 800;
       text-shadow: 0 0 3px #000;
-      width: 80px;
+      width: clamp(52px, 10vw, 80px);
       text-align: center;
       line-height: 1.1;
       pointer-events: none;
@@ -85,26 +103,26 @@
 
     .pointer {
       position: absolute;
-      top: -22px;
+      top: clamp(-20px, -2.2vw, -22px);
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
-      border-left: 22px solid transparent;
-      border-right: 22px solid transparent;
-      border-bottom: 34px solid #ffffff;
+      border-left: clamp(14px, 2.8vw, 22px) solid transparent;
+      border-right: clamp(14px, 2.8vw, 22px) solid transparent;
+      border-bottom: clamp(22px, 4.2vw, 34px) solid #ffffff;
       filter: drop-shadow(0 0 4px #000);
       z-index: 20;
     }
 
-    /* ---------- PIG VIDEO (ADDED / RESTORED) ---------- */
+    /* ---------- PIG VIDEO ---------- */
     .pig-video {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 300px;
-      max-width: 60%;
+      width: clamp(180px, 35vw, 300px);
+      max-width: 70%;
       height: auto;
       display: none;
       z-index: 45;
@@ -125,7 +143,7 @@
       background: rgba(0, 0, 0, 0.8);
       border: 2px solid #00ff66;
       color: #00ff66;
-      font-size: 22px;
+      font-size: clamp(14px, 2.8vw, 22px);
       font-weight: bold;
       text-shadow: 0 0 6px #000;
       display: none;
@@ -136,7 +154,7 @@
       user-select: none;
     }
 
-    /* "Keep Spinning Pig" overlay */
+    /* Keep Spinning overlay */
     .send-now-overlay {
       position: absolute;
       top: 80%;
@@ -147,7 +165,7 @@
       background: rgba(0, 0, 0, 0.85);
       border: 2px solid #ffcc00;
       color: #ffcc00;
-      font-size: 24px;
+      font-size: clamp(14px, 3vw, 24px);
       font-weight: 900;
       text-shadow: 0 0 6px #000;
       display: none;
@@ -175,12 +193,12 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 14px 32px;
+      padding: clamp(10px, 1.6vw, 14px) clamp(18px, 3.4vw, 32px);
       border: none;
       border-radius: 999px;
       background: linear-gradient(135deg, #ff66aa, #ff3366);
       color: #fff;
-      font-size: 20px;
+      font-size: clamp(14px, 2.8vw, 20px);
       font-weight: bold;
       cursor: pointer;
       text-transform: uppercase;
@@ -192,23 +210,24 @@
       cursor: not-allowed;
     }
 
-    /* ---------- MULTIPLIER WHEEL (350px) ---------- */
+    /* ---------- MULTIPLIER WHEEL ---------- */
     .mult-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 6px;
-      margin-top: 8px;
-      flex-shrink: 0;
+      margin-top: 6px;
+      width: var(--multWrap);
+      flex: 0 0 auto;
     }
 
     .mult-title {
-      font-size: 18px;
+      font-size: clamp(14px, 2.4vw, 18px);
       margin-bottom: 2px;
     }
 
     .mult-locked {
-      font-size: 14px;
+      font-size: clamp(12px, 2.2vw, 14px);
       padding: 6px 12px;
       border-radius: 999px;
       background: rgba(0,0,0,0.7);
@@ -216,29 +235,26 @@
       color: #ddd;
       white-space: nowrap;
       user-select: none;
+      text-align: center;
     }
 
     .mult-inner {
       position: relative;
-      width: 380px;
-      height: 380px;
+      width: calc(var(--multWheel) + 30px);
+      height: calc(var(--multWheel) + 30px);
       display: none;
       align-items: center;
       justify-content: center;
     }
 
-    .mult-wrapper.unlocked .mult-inner {
-      display: flex;
-    }
-    .mult-wrapper.unlocked .mult-locked {
-      display: none;
-    }
+    .mult-wrapper.unlocked .mult-inner { display: flex; }
+    .mult-wrapper.unlocked .mult-locked { display: none; }
 
     .mult-wheel {
-      width: 350px;
-      height: 350px;
+      width: var(--multWheel);
+      height: var(--multWheel);
       border-radius: 50%;
-      border: 8px solid #44ddaa;
+      border: clamp(5px, 1.2vw, 8px) solid #44ddaa;
       box-shadow: 0 0 18px rgba(0,0,0,0.9);
       position: relative;
       transition: transform 8s cubic-bezier(0.15, 0.85, 0.25, 1);
@@ -261,10 +277,10 @@
       top: 50%;
       transform-origin: center center;
       color: #fff;
-      font-size: 18px;
+      font-size: clamp(12px, 2.4vw, 18px);
       font-weight: bold;
       text-shadow: 0 0 3px #000;
-      width: 80px;
+      width: clamp(52px, 12vw, 80px);
       text-align: center;
       line-height: 1.1;
       pointer-events: none;
@@ -273,50 +289,39 @@
 
     .mult-pointer {
       position: absolute;
-      top: -18px;
+      top: clamp(-16px, -2vw, -18px);
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
-      border-left: 18px solid transparent;
-      border-right: 18px solid transparent;
-      border-bottom: 30px solid #ffffff;
+      border-left: clamp(12px, 2.2vw, 18px) solid transparent;
+      border-right: clamp(12px, 2.2vw, 18px) solid transparent;
+      border-bottom: clamp(20px, 3.6vw, 30px) solid #ffffff;
       filter: drop-shadow(0 0 4px #000);
       z-index: 20;
     }
 
     .mult-spin-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 10px 24px;
-      font-size: 18px;
-      z-index: 25;
-      background: linear-gradient(135deg, #44ddaa, #11aa88);
-      display: none; /* hidden; multiplier is auto */
+      display: none;
     }
 
     /* ---------- STATS / COUNTER ---------- */
     .sidebar {
-      width: 520px;
-      min-width: 520px;
-      max-width: 520px;
+      width: var(--sidebarW);
+      height: var(--sidebarH);
       background: #181818;
       border-radius: 12px;
-      padding: 20px 22px;
+      padding: 16px 16px;
       box-shadow: 0 0 18px rgba(0,0,0,0.7);
       text-align: center;
       box-sizing: border-box;
       overflow: hidden;
-      flex-shrink: 0;
-      height: 330px; /* fixed to stop wheel shifting */
+      flex: 0 0 auto;
     }
 
     .sidebar h2 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      font-size: 24px;
+      margin: 0 0 10px 0;
+      font-size: clamp(18px, 4vw, 24px);
       border-bottom: 1px solid #333;
       padding-bottom: 8px;
     }
@@ -324,8 +329,10 @@
     .stats-row {
       display: flex;
       justify-content: space-around;
+      gap: 10px;
       margin-bottom: 10px;
-      font-size: 18px;
+      font-size: clamp(14px, 3vw, 18px);
+      flex-wrap: wrap;
     }
 
     .stats-row > div {
@@ -336,17 +343,16 @@
     }
 
     .history-title {
-      margin-top: 12px;
-      font-size: 18px;
+      margin-top: 10px;
+      font-size: clamp(14px, 3vw, 18px);
       border-bottom: 1px solid #333;
       padding-bottom: 5px;
     }
 
-    /* Only show last + previous spin, fixed size */
     .history-box {
       margin-top: 10px;
       text-align: left;
-      font-size: 15px;
+      font-size: clamp(12px, 2.6vw, 15px);
       line-height: 1.4;
       height: 70px;
       overflow: hidden;
@@ -364,10 +370,10 @@
     }
 
     .reset-btn {
-      margin-top: 12px;
+      margin-top: 10px;
       padding: 8px 14px;
-      font-size: 15px;
-      border-radius: 4px;
+      font-size: clamp(12px, 2.6vw, 15px);
+      border-radius: 6px;
       border: 1px solid #444;
       background: #222;
       color: #eee;
@@ -376,28 +382,28 @@
 
     /* ---------- PAYMENT SECTION ---------- */
     .pay-section {
-      margin-top: 14px;
+      margin-top: 10px;
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
     }
 
     .pay-btn {
-      padding: 12px 18px;
+      padding: 10px 14px;
       border-radius: 10px;
       font-weight: 900;
-      font-size: 14px;
+      font-size: clamp(12px, 2.6vw, 14px);
       text-decoration: none;
       letter-spacing: 0.5px;
       text-align: center;
-      min-width: 210px;
+      min-width: min(210px, 90%);
       box-shadow: 0 0 12px rgba(0,0,0,0.6);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     .pay-btn:hover {
-      transform: scale(1.05);
+      transform: scale(1.03);
       box-shadow: 0 0 18px rgba(0,0,0,0.9);
     }
 
@@ -414,7 +420,6 @@
 </head>
 <body>
   <div class="app">
-    <!-- MAIN + MULTIPLIER WHEELS IN A ROW -->
     <div class="wheels-row">
       <!-- MAIN CASH WHEEL -->
       <div class="wheel-wrapper">
@@ -429,7 +434,7 @@
           KEEP SPINNING PIG
         </div>
 
-        <!-- PIG VIDEO (plays on each $100 milestone) -->
+        <!-- PIG VIDEO (plays on $100 milestones only) -->
         <video id="pigVideo" class="pig-video" muted playsinline preload="auto">
           <source src="pig-video.mp4" type="video/mp4">
         </video>
@@ -457,34 +462,33 @@
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- STATS / COUNTER -->
-    <div class="sidebar">
-      <h2>Cash Piggy 🐷</h2>
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <h2>Cash Piggy 🐷</h2>
 
-      <div class="stats-row">
-        <div>Total: <strong>$<span id="total">0</span></strong></div>
-        <div>Spins: <strong><span id="spinCount">0</span></strong></div>
-        <div>Last: <strong>$<span id="lastResult">–</span></strong></div>
-      </div>
+        <div class="stats-row">
+          <div>Total: <strong>$<span id="total">0</span></strong></div>
+          <div>Spins: <strong><span id="spinCount">0</span></strong></div>
+          <div>Last: <strong>$<span id="lastResult">–</span></strong></div>
+        </div>
 
-      <div class="history-title">Recent spins</div>
-      <div class="history-box">
-        <div class="history-line"><strong>Last:</strong> <span id="lastSpinLine">–</span></div>
-        <div class="history-line"><strong>Prev:</strong> <span id="prevSpinLine">–</span></div>
-      </div>
+        <div class="history-title">Recent spins</div>
+        <div class="history-box">
+          <div class="history-line"><strong>Last:</strong> <span id="lastSpinLine">–</span></div>
+          <div class="history-line"><strong>Prev:</strong> <span id="prevSpinLine">–</span></div>
+        </div>
 
-      <button id="resetBtn" class="reset-btn">Reset session</button>
+        <button id="resetBtn" class="reset-btn">Reset session</button>
 
-      <!-- PAYMENT -->
-      <div id="pay-section" class="pay-section">
-        <a id="venmo-link" class="pay-btn v-btn" href="#" target="_blank" rel="noopener">
-          SETTLE VIA VENMO
-        </a>
-        <a id="crypto-link" class="pay-btn c-btn" href="#" target="_blank" rel="noopener">
-          SETTLE VIA USDC (BASE)
-        </a>
+        <div id="pay-section" class="pay-section">
+          <a id="venmo-link" class="pay-btn v-btn" href="#" target="_blank" rel="noopener">
+            SETTLE VIA VENMO
+          </a>
+          <a id="crypto-link" class="pay-btn c-btn" href="#" target="_blank" rel="noopener">
+            SETTLE VIA USDC (BASE)
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -553,7 +557,6 @@
     let lastSpinText = "–";
     let prevSpinText = "–";
 
-    // SAFETY TIMERS so button never gets stuck
     let baseEndTimer = null;
     let multEndTimer = null;
 
@@ -563,7 +566,9 @@
 
     /* ---------- LABELS ---------- */
     function createBaseLabels() {
-      const radius = 260;
+      wheel.innerHTML = ""; // keep clean if reloaded
+      const radius = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--mainWheel')) / 2) - 60;
+
       prizes.forEach((value, index) => {
         const label = document.createElement("div");
         label.className = "wheel-label";
@@ -580,7 +585,9 @@
     }
 
     function createMultLabels() {
-      const radius = 135;
+      multWheel.innerHTML = "";
+      const radius = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--multWheel')) / 2) - 55;
+
       multipliers.forEach((value, index) => {
         const label = document.createElement("div");
         label.className = "mult-label";
@@ -598,6 +605,12 @@
 
     createBaseLabels();
     createMultLabels();
+
+    // Rebuild labels on resize so they stay centered nicely
+    window.addEventListener("resize", () => {
+      createBaseLabels();
+      createMultLabels();
+    });
 
     /* ---------- UTIL ---------- */
     function pickRandomIndex(len) {
@@ -664,11 +677,8 @@
 
     /* ---------- PIG VIDEO LOGIC (MILESTONE-BASED) ---------- */
     function maybePlayPigVideo() {
-      // Play once per $100 milestone crossed (100, 200, 300...)
       if (total < nextVideoMilestone) return;
 
-      // If we somehow jumped multiple milestones in one spin, still only play once,
-      // but advance the milestone past the current total.
       while (total >= nextVideoMilestone) {
         nextVideoMilestone += 100;
       }
@@ -683,7 +693,6 @@
         pigVideo.currentTime = 0;
         pigVideo.style.display = "block";
 
-        // iOS/Safari: must be muted + playsinline (we set that in HTML)
         pigVideo.play().catch(() => {});
 
         pigVideoTimer = setTimeout(() => {
@@ -691,7 +700,6 @@
           pigVideo.style.display = "none";
         }, 3000);
       } catch (e) {
-        // If video fails for any reason, just hide it
         pigVideo.style.display = "none";
       }
     }
@@ -722,7 +730,6 @@
       let delta = (desiredFinal - (baseRotation % 360) + 360) % 360;
       const newRotation = baseRotation + fullRotationDegrees + delta;
 
-      wheel.style.transition = "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
       wheel.style.transform = `rotate(${newRotation}deg)`;
 
       const finishBase = () => {
@@ -745,8 +752,6 @@
 
         showKeepSpinningPrompt();
         checkUnlockMultiplier();
-
-        // NEW: pig video only on $100 milestones
         maybePlayPigVideo();
 
         if (total >= 150) {
@@ -784,7 +789,8 @@
       let delta = (desiredFinal - (multRotation % 360) + 360) % 360;
       const newRotation = multRotation + fullRotationDegrees + delta;
 
-      multWheel.style.transition = "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
+      // Safari/IOS nudge to ensure transform transition always triggers
+      void multWheel.offsetWidth;
       multWheel.style.transform = `rotate(${newRotation}deg)`;
 
       const finishMult = () => {
@@ -810,8 +816,6 @@
 
         showKeepSpinningPrompt();
         checkUnlockMultiplier();
-
-        // NEW: pig video only on $100 milestones (after multiplier adds)
         maybePlayPigVideo();
 
         isSpinning = false;
@@ -869,14 +873,12 @@
       lastSpinLineEl.textContent = "–";
       prevSpinLineEl.textContent = "–";
 
-      // Reset milestone tracking too
       nextVideoMilestone = 100;
     }
 
     /* ---------- EVENTS ---------- */
     spinBtn.addEventListener("click", spinBaseWheel);
 
-    // Manual multiplier button still wired but hidden
     multSpinBtn.addEventListener("click", () => {
       alert("Multiplier spins automatically after unlock.");
     });
