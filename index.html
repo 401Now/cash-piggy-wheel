@@ -97,6 +97,23 @@
       z-index: 20;
     }
 
+    /* ---------- PIG VIDEO (ADDED / RESTORED) ---------- */
+    .pig-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      max-width: 60%;
+      height: auto;
+      display: none;
+      z-index: 45;
+      border-radius: 14px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.9);
+      pointer-events: none;
+      user-select: none;
+    }
+
     /* Big win overlay */
     .big-win-overlay {
       position: absolute;
@@ -119,7 +136,7 @@
       user-select: none;
     }
 
-    /* "Send Now Piggy" overlay */
+    /* "Keep Spinning Pig" overlay */
     .send-now-overlay {
       position: absolute;
       top: 80%;
@@ -293,9 +310,7 @@
       box-sizing: border-box;
       overflow: hidden;
       flex-shrink: 0;
-
-      /* key to stop wheel shifting: fixed height */
-      height: 330px;
+      height: 330px; /* fixed to stop wheel shifting */
     }
 
     .sidebar h2 {
@@ -411,8 +426,13 @@
         </div>
 
         <div id="sendNowOverlay" class="send-now-overlay">
-          SEND NOW PIGGY
+          KEEP SPINNING PIG
         </div>
+
+        <!-- PIG VIDEO (plays on each $100 milestone) -->
+        <video id="pigVideo" class="pig-video" muted playsinline preload="auto">
+          <source src="pig-video.mp4" type="video/mp4">
+        </video>
 
         <button id="spinBtn" class="spin-btn">Spin</button>
 
@@ -498,6 +518,8 @@
     const bigWinOverlay = document.getElementById("bigWinOverlay");
     const sendNowOverlay = document.getElementById("sendNowOverlay");
 
+    const pigVideo = document.getElementById("pigVideo");
+
     const multWrapper = document.getElementById("multWrapper");
     const multWheel = document.getElementById("multWheel");
     const multSpinBtn = document.getElementById("multSpinBtn");
@@ -534,6 +556,10 @@
     // SAFETY TIMERS so button never gets stuck
     let baseEndTimer = null;
     let multEndTimer = null;
+
+    // VIDEO THRESHOLD: play at 100, 200, 300, ...
+    let nextVideoMilestone = 100;
+    let pigVideoTimer = null;
 
     /* ---------- LABELS ---------- */
     function createBaseLabels() {
@@ -596,16 +622,13 @@
         a.volume = 0;
         a.play().catch(() => {});
         setTimeout(() => {
-          try {
-            a.pause();
-            a.currentTime = 0;
-          } catch (e) {}
+          try { a.pause(); a.currentTime = 0; } catch (e) {}
           a.volume = originalVolume;
         }, 200);
       });
     }
 
-    function showSendNowPrompt() {
+    function showKeepSpinningPrompt() {
       if (sendNowTimeoutId !== null) clearTimeout(sendNowTimeoutId);
       sendNowOverlay.style.display = "block";
       sendNowTimeoutId = setTimeout(() => {
@@ -615,9 +638,6 @@
 
     function showBigWin() {
       bigWinOverlay.style.display = "block";
-      bigWinOverlay.style.animation = "none";
-      void bigWinOverlay.offsetWidth;
-      bigWinOverlay.style.animation = "piggy-pop 0.6s ease-out forwards";
       playSoundSafe(bigWinSound);
       setTimeout(() => {
         bigWinOverlay.style.display = "none";
@@ -640,6 +660,40 @@
     function safeClearTimer(t) {
       if (t !== null) clearTimeout(t);
       return null;
+    }
+
+    /* ---------- PIG VIDEO LOGIC (MILESTONE-BASED) ---------- */
+    function maybePlayPigVideo() {
+      // Play once per $100 milestone crossed (100, 200, 300...)
+      if (total < nextVideoMilestone) return;
+
+      // If we somehow jumped multiple milestones in one spin, still only play once,
+      // but advance the milestone past the current total.
+      while (total >= nextVideoMilestone) {
+        nextVideoMilestone += 100;
+      }
+
+      try {
+        if (pigVideoTimer) {
+          clearTimeout(pigVideoTimer);
+          pigVideoTimer = null;
+        }
+
+        pigVideo.pause();
+        pigVideo.currentTime = 0;
+        pigVideo.style.display = "block";
+
+        // iOS/Safari: must be muted + playsinline (we set that in HTML)
+        pigVideo.play().catch(() => {});
+
+        pigVideoTimer = setTimeout(() => {
+          try { pigVideo.pause(); } catch (e) {}
+          pigVideo.style.display = "none";
+        }, 3000);
+      } catch (e) {
+        // If video fails for any reason, just hide it
+        pigVideo.style.display = "none";
+      }
     }
 
     /* ---------- MAIN CASH WHEEL SPIN ---------- */
@@ -689,8 +743,11 @@
 
         updateRecentSpins(`Base: $${targetPrize}`);
 
-        showSendNowPrompt();
+        showKeepSpinningPrompt();
         checkUnlockMultiplier();
+
+        // NEW: pig video only on $100 milestones
+        maybePlayPigVideo();
 
         if (total >= 150) {
           spinMultiplierAuto(targetPrize);
@@ -751,8 +808,11 @@
 
         if (payout >= 100) showBigWin();
 
-        showSendNowPrompt();
+        showKeepSpinningPrompt();
         checkUnlockMultiplier();
+
+        // NEW: pig video only on $100 milestones (after multiplier adds)
+        maybePlayPigVideo();
 
         isSpinning = false;
         spinBtn.disabled = false;
@@ -773,6 +833,13 @@
     function resetSession() {
       baseEndTimer = safeClearTimer(baseEndTimer);
       multEndTimer = safeClearTimer(multEndTimer);
+
+      if (pigVideoTimer) {
+        clearTimeout(pigVideoTimer);
+        pigVideoTimer = null;
+      }
+      try { pigVideo.pause(); } catch (e) {}
+      pigVideo.style.display = "none";
 
       if (spinCount > 0) {
         const summary =
@@ -801,6 +868,9 @@
       prevSpinText = "–";
       lastSpinLineEl.textContent = "–";
       prevSpinLineEl.textContent = "–";
+
+      // Reset milestone tracking too
+      nextVideoMilestone = 100;
     }
 
     /* ---------- EVENTS ---------- */
