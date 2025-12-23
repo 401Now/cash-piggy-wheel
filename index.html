@@ -13,7 +13,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden; /* ADDED: prevent page shifting due to overflow */
+      overflow: hidden;
     }
 
     .app {
@@ -29,7 +29,7 @@
       align-items: flex-start;
       justify-content: center;
       gap: 16px;
-      flex-wrap: nowrap; /* ADDED: keeps wheel + sidebar from wrapping/pushing layout */
+      flex-wrap: nowrap;
     }
 
     /* ---------- MAIN WHEEL (600px) ---------- */
@@ -40,7 +40,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0; /* ADDED: do not allow wheel to shrink */
+      flex-shrink: 0;
     }
 
     .wheel {
@@ -176,7 +176,7 @@
       align-items: center;
       gap: 6px;
       margin-top: 8px;
-      flex-shrink: 0; /* ADDED: don't shrink multiplier either */
+      flex-shrink: 0;
     }
 
     .mult-title {
@@ -273,17 +273,18 @@
 
     /* ---------- STATS / COUNTER ---------- */
     .sidebar {
-      width: 520px;              /* CHANGED: lock width so it never grows */
-      min-width: 520px;          /* ADDED */
-      max-width: 520px;          /* ADDED */
+      width: 520px;
+      min-width: 520px;
+      max-width: 520px;
       background: #181818;
       border-radius: 12px;
       padding: 20px 22px;
       box-shadow: 0 0 18px rgba(0,0,0,0.7);
       text-align: center;
-      box-sizing: border-box;    /* ADDED */
-      overflow: hidden;          /* ADDED */
-      flex-shrink: 0;            /* ADDED: keep layout stable */
+      box-sizing: border-box;
+      overflow: hidden;
+      flex-shrink: 0;
+      height: 300px; /* keep layout stable so wheel doesn't shift */
     }
 
     .sidebar h2 {
@@ -301,7 +302,6 @@
       font-size: 18px;
     }
 
-    /* ADDED: prevent long numbers from expanding layout */
     .stats-row > div {
       max-width: 160px;
       overflow: hidden;
@@ -316,20 +316,24 @@
       padding-bottom: 5px;
     }
 
-    .history {
-      list-style: none;
-      padding-left: 0;
-      max-height: 140px;
-      overflow-y: auto;
-      overflow-x: hidden;        /* ADDED */
-      word-break: break-word;    /* ADDED */
-      font-size: 15px;
+    .history-box {
+      margin-top: 10px;
       text-align: left;
-      margin: 0;
+      font-size: 15px;
+      line-height: 1.4;
+      height: 70px;
+      overflow: hidden;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid #333;
+      box-sizing: border-box;
     }
 
-    .history li {
-      padding: 3px 0;
+    .history-line {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .reset-btn {
@@ -343,7 +347,7 @@
       cursor: pointer;
     }
 
-    /* ---------- PAYMENT SECTION (ADDED) ---------- */
+    /* ---------- PAYMENT SECTION ---------- */
     .pay-section {
       margin-top: 14px;
       display: flex;
@@ -379,14 +383,11 @@
       background: linear-gradient(135deg, #00ffcc, #009988);
       color: #002222;
     }
-
   </style>
 </head>
 <body>
   <div class="app">
-    <!-- MAIN + MULTIPLIER WHEELS IN A ROW -->
     <div class="wheels-row">
-      <!-- MAIN CASH WHEEL -->
       <div class="wheel-wrapper">
         <div class="pointer"></div>
         <div id="wheel" class="wheel"></div>
@@ -401,13 +402,11 @@
 
         <button id="spinBtn" class="spin-btn">Spin</button>
 
-        <!-- Audio -->
         <audio id="spinOink" src="pig-spin.mp3" preload="auto"></audio>
         <audio id="winOinks" src="pig-win.mp3" preload="auto"></audio>
         <audio id="bigWinSound" src="cash-win.mp3" preload="auto"></audio>
       </div>
 
-      <!-- MULTIPLIER WHEEL (LOCKED UNTIL TOTAL >= 150) -->
       <div id="multWrapper" class="mult-wrapper">
         <div class="mult-title">Multiplier Wheel</div>
         <div id="multLocked" class="mult-locked">
@@ -424,7 +423,6 @@
       </div>
     </div>
 
-    <!-- STATS / COUNTER -->
     <div class="sidebar">
       <h2>Cash Piggy 🐷</h2>
 
@@ -434,12 +432,15 @@
         <div>Last: <strong>$<span id="lastResult">–</span></strong></div>
       </div>
 
-      <div class="history-title">Spin history</div>
-      <ul id="history" class="history"></ul>
+      <div class="history-title">Recent spins</div>
+
+      <div class="history-box">
+        <div class="history-line"><strong>Last:</strong> <span id="lastSpinLine">–</span></div>
+        <div class="history-line"><strong>Prev:</strong> <span id="prevSpinLine">–</span></div>
+      </div>
 
       <button id="resetBtn" class="reset-btn">Reset session</button>
 
-      <!-- PAYMENT (ADDED) -->
       <div id="pay-section" class="pay-section">
         <a id="venmo-link" class="pay-btn v-btn" href="#" target="_blank" rel="noopener">
           SETTLE VIA VENMO
@@ -453,13 +454,10 @@
 
   <script>
     /* ---------- DATA ---------- */
-
-    // Wheel 1: 5–50 in increments of 5 (randomized order)
     const basePrizes = [5,10,15,20,25,30,35,40,45,50];
     const baseSliceCount = basePrizes.length;
     const baseSliceAngle = 360 / baseSliceCount;
 
-    // Multiplier wheel: unlocks at total >= 150
     const baseMultipliers = [1.25,1.5,1.75,2,2.25,2.5,2.75,3];
     const multSliceCount = baseMultipliers.length;
     const multSliceAngle = 360 / multSliceCount;
@@ -490,13 +488,15 @@
     const totalEl = document.getElementById("total");
     const lastResultEl = document.getElementById("lastResult");
     const spinCountEl = document.getElementById("spinCount");
-    const historyEl = document.getElementById("history");
+
+    const lastSpinLineEl = document.getElementById("lastSpinLine");
+    const prevSpinLineEl = document.getElementById("prevSpinLine");
 
     const spinOink = document.getElementById("spinOink");
     const winOinks = document.getElementById("winOinks");
     const bigWinSound = document.getElementById("bigWinSound");
 
-    /* ---------- PAYMENT LINKS (ADDED) ---------- */
+    /* ---------- PAYMENT LINKS ---------- */
     const venmoLink = document.getElementById("venmo-link");
     const cryptoLink = document.getElementById("crypto-link");
     venmoLink.href = "https://venmo.com/outcastjaxton";
@@ -505,16 +505,22 @@
     /* ---------- STATE ---------- */
     let baseRotation = 0;
     let multRotation = 0;
-    let isSpinning = false;      // single flag for both wheels
+    let isSpinning = false;
     let total = 0;
     let spinCount = 0;
     let audioPrimed = false;
     let sendNowTimeoutId = null;
 
-    /* ---------- LABELS ---------- */
+    let lastSpinText = "–";
+    let prevSpinText = "–";
 
+    // NEW: safety timers so button never gets stuck disabled
+    let baseEndTimer = null;
+    let multEndTimer = null;
+
+    /* ---------- LABELS ---------- */
     function createBaseLabels() {
-      const radius = 260; // tuned for 600px wheel
+      const radius = 260;
       prizes.forEach((value, index) => {
         const label = document.createElement("div");
         label.className = "wheel-label";
@@ -525,14 +531,13 @@
         const x = radius * Math.cos(angleRad);
         const y = radius * Math.sin(angleRad);
 
-        label.style.transform =
-          `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+        label.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
         wheel.appendChild(label);
       });
     }
 
     function createMultLabels() {
-      const radius = 135; // tuned for 350px wheel
+      const radius = 135;
       multipliers.forEach((value, index) => {
         const label = document.createElement("div");
         label.className = "mult-label";
@@ -543,8 +548,7 @@
         const x = radius * Math.cos(angleRad);
         const y = radius * Math.sin(angleRad);
 
-        label.style.transform =
-          `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+        label.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
         multWheel.appendChild(label);
       });
     }
@@ -553,7 +557,6 @@
     createMultLabels();
 
     /* ---------- UTIL ---------- */
-
     function pickRandomIndex(len) {
       return Math.floor(Math.random() * len);
     }
@@ -586,9 +589,7 @@
     }
 
     function showSendNowPrompt() {
-      if (sendNowTimeoutId !== null) {
-        clearTimeout(sendNowTimeoutId);
-      }
+      if (sendNowTimeoutId !== null) clearTimeout(sendNowTimeoutId);
       sendNowOverlay.style.display = "block";
       sendNowTimeoutId = setTimeout(() => {
         sendNowOverlay.style.display = "none";
@@ -612,15 +613,27 @@
       }
     }
 
-    /* ---------- MAIN CASH WHEEL SPIN ---------- */
+    function updateRecentSpins(newText) {
+      prevSpinText = lastSpinText;
+      lastSpinText = newText;
+      lastSpinLineEl.textContent = lastSpinText;
+      prevSpinLineEl.textContent = prevSpinText;
+    }
 
+    function safeClearTimer(t) {
+      if (t !== null) clearTimeout(t);
+      return null;
+    }
+
+    /* ---------- MAIN CASH WHEEL SPIN ---------- */
     function spinBaseWheel() {
-      if (isSpinning) return;   // block if anything is spinning
+      if (isSpinning) return;
 
       primeAudioIfNeeded();
 
       isSpinning = true;
       spinBtn.disabled = true;
+
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
 
@@ -638,19 +651,16 @@
       let delta = (desiredFinal - (baseRotation % 360) + 360) % 360;
       const newRotation = baseRotation + fullRotationDegrees + delta;
 
-      wheel.style.transition =
-        "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
+      wheel.style.transition = "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
       wheel.style.transform = `rotate(${newRotation}deg)`;
 
-      const onEnd = () => {
+      const finishBase = () => {
+        baseEndTimer = safeClearTimer(baseEndTimer);
         wheel.removeEventListener("transitionend", onEnd);
         baseRotation = newRotation;
 
         playSoundSafe(winOinks);
-
-        if (targetPrize === 50) {
-          showBigWin();
-        }
+        if (targetPrize === 50) showBigWin();
 
         total += targetPrize;
         spinCount++;
@@ -659,32 +669,34 @@
         lastResultEl.textContent = targetPrize;
         spinCountEl.textContent = spinCount;
 
-        const li = document.createElement("li");
-        li.textContent = `Base spin ${spinCount}: $${targetPrize}`;
-        historyEl.prepend(li);
+        updateRecentSpins(`Base: $${targetPrize}`);
 
         showSendNowPrompt();
         checkUnlockMultiplier();
 
-        // If unlocked, automatically spin multiplier wheel using this base prize
         if (total >= 150) {
           spinMultiplierAuto(targetPrize);
         } else {
-          // No multiplier yet, fully done
           isSpinning = false;
           spinBtn.disabled = false;
         }
       };
 
+      const onEnd = (e) => {
+        // Only accept transitionend from transform on the wheel itself
+        if (e.target !== wheel || e.propertyName !== "transform") return;
+        finishBase();
+      };
+
       wheel.addEventListener("transitionend", onEnd);
+
+      // NEW: fallback in case transitionend doesn't fire (Safari / iOS)
+      baseEndTimer = safeClearTimer(baseEndTimer);
+      baseEndTimer = setTimeout(finishBase, 8200);
     }
 
     /* ---------- MULTIPLIER WHEEL SPIN (AUTO AFTER UNLOCK) ---------- */
-
     function spinMultiplierAuto(baseAmount) {
-      // baseAmount = the prize from the just-finished base spin
-      // assumes total >= 150 and isSpinning is already true
-
       playSoundSafe(spinOink);
 
       const targetIndex = pickRandomIndex(multipliers.length);
@@ -699,18 +711,18 @@
       let delta = (desiredFinal - (multRotation % 360) + 360) % 360;
       const newRotation = multRotation + fullRotationDegrees + delta;
 
-      multWheel.style.transition =
-        "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
+      multWheel.style.transition = "transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)";
       multWheel.style.transform = `rotate(${newRotation}deg)`;
 
-      const onEnd = () => {
+      const finishMult = () => {
+        multEndTimer = safeClearTimer(multEndTimer);
         multWheel.removeEventListener("transitionend", onEnd);
         multRotation = newRotation;
 
         playSoundSafe(winOinks);
 
         const raw = baseAmount * multiplier;
-        const payout = Math.round(raw / 5) * 5; // round to nearest 5
+        const payout = Math.round(raw / 5) * 5;
 
         total += payout;
         spinCount++;
@@ -719,29 +731,35 @@
         lastResultEl.textContent = payout;
         spinCountEl.textContent = spinCount;
 
-        const li = document.createElement("li");
-        li.textContent =
-          `Multiplier spin ${spinCount}: x${multiplier} on $${baseAmount} → $${payout}`;
-        historyEl.prepend(li);
+        updateRecentSpins(`Mult: x${multiplier} on $${baseAmount} → $${payout}`);
 
-        if (payout >= 100) {
-          showBigWin();
-        }
+        if (payout >= 100) showBigWin();
 
         showSendNowPrompt();
         checkUnlockMultiplier();
 
-        // sequence finished: allow new spin
         isSpinning = false;
         spinBtn.disabled = false;
       };
 
+      const onEnd = (e) => {
+        if (e.target !== multWheel || e.propertyName !== "transform") return;
+        finishMult();
+      };
+
       multWheel.addEventListener("transitionend", onEnd);
+
+      // NEW: fallback in case transitionend doesn't fire
+      multEndTimer = safeClearTimer(multEndTimer);
+      multEndTimer = setTimeout(finishMult, 8200);
     }
 
     /* ---------- RESET ---------- */
-
     function resetSession() {
+      // clear any pending end timers to avoid weird state after reset
+      baseEndTimer = safeClearTimer(baseEndTimer);
+      multEndTimer = safeClearTimer(multEndTimer);
+
       if (spinCount > 0) {
         const summary =
           `Cash Piggy Session Summary\n\n` +
@@ -756,17 +774,20 @@
       totalEl.textContent = "0";
       spinCountEl.textContent = "0";
       lastResultEl.textContent = "–";
-      historyEl.innerHTML = "";
       bigWinOverlay.style.display = "none";
       sendNowOverlay.style.display = "none";
       multWrapper.classList.remove("unlocked");
       isSpinning = false;
       spinBtn.disabled = false;
+
+      lastSpinText = "–";
+      prevSpinText = "–";
+      lastSpinLineEl.textContent = "–";
+      prevSpinLineEl.textContent = "–";
     }
 
     /* ---------- EVENTS ---------- */
     spinBtn.addEventListener("click", spinBaseWheel);
-    // Manual multiplier button still wired but hidden
     multSpinBtn.addEventListener("click", () => {
       alert("Multiplier spins automatically after unlock.");
     });
